@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accuflip Math Adventure: Fractions</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #1a0a00; --bg2: #2a1000; --card: #2e1a06; --card2: #3a2210;
+  --accent: #ff8c00; --accent2: #ffd700; --text: #fff8f0; --subtext: #b0855a;
+  --border: rgba(255,140,0,0.15); --correct: #00e676; --wrong: #ff5252;
+  --life: #ff7043; --progress-fill: #ff8c00; --btn-shadow: rgba(255,140,0,0.5);
+  --choice-bg: #2a1a08; --choice-border: #4a3018; --choice-hover: #3a2410;
+  --font-title: 'Fredoka One', cursive; --font-body: 'Nunito', sans-serif;
+}
+body.theme-bakery {
+  --bg: #1a0510; --bg2: #250b18; --card: #2e1020; --card2: #3a1828;
+  --accent: #ff4d8a; --accent2: #ffd6e7; --text: #fff0f5; --subtext: #b06080;
+  --border: rgba(255,77,138,0.15); --correct: #69f0ae; --wrong: #ff5252;
+  --progress-fill: #ff4d8a; --btn-shadow: rgba(255,77,138,0.5);
+  --choice-bg: #280e1c; --choice-border: #4a1e34; --choice-hover: #3a1428;
+}
+body.theme-farm {
+  --bg: #0d1a05; --bg2: #122205; --card: #182e08; --card2: #1e380a;
+  --accent: #8bc34a; --accent2: #ffeb3b; --text: #f0fff0; --subtext: #6a9a50;
+  --border: rgba(139,195,74,0.15); --correct: #00e676; --wrong: #ff5252;
+  --progress-fill: #8bc34a; --btn-shadow: rgba(139,195,74,0.5);
+  --choice-bg: #142808; --choice-border: #2a4a10; --choice-hover: #1e3a0c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%); color: var(--text); font-family: var(--font-body); min-height: 100vh; transition: background 0.5s; }
+.bg-layer { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at 20% 20%, var(--accent) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, var(--accent2) 0%, transparent 50%); opacity: 0.04; }
+.life-lost-flash { position: fixed; inset: 0; pointer-events: none; z-index: 999; background: var(--wrong); opacity: 0; }
+.life-lost-flash.flash { animation: flashRed 0.5s ease; }
+.correct-flash { position: fixed; inset: 0; pointer-events: none; z-index: 999; background: var(--correct); opacity: 0; }
+.correct-flash.flash { animation: flashGreen 0.4s ease; }
+@keyframes flashRed { 0%,100%{opacity:0} 30%{opacity:0.18} }
+@keyframes flashGreen { 0%,100%{opacity:0} 20%{opacity:0.12} }
+
+.start-screen { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%); transition: opacity 0.4s; overflow-y: auto; }
+.start-screen.hidden { opacity: 0; pointer-events: none; }
+.start-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 28px 24px; width: 100%; max-width: 440px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); position: relative; z-index: 1; }
+.start-logo { font-size: 3.5rem; text-align: center; margin-bottom: 6px; }
+.start-title { font-family: var(--font-title); font-size: 1.6rem; text-align: center; margin-bottom: 2px; line-height: 1.1; }
+.start-tagline { text-align: center; color: var(--subtext); font-size: 0.8rem; font-weight: 700; margin-bottom: 18px; }
+.name-input { width: 100%; padding: 12px 16px; border-radius: 14px; border: 2px solid var(--choice-border); background: var(--choice-bg); color: var(--text); font-family: var(--font-body); font-size: 1rem; font-weight: 700; margin-bottom: 14px; outline: none; transition: border-color 0.2s; }
+.name-input:focus { border-color: var(--accent); }
+.start-section-label { font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--subtext); margin-bottom: 7px; }
+.start-themes { display: flex; gap: 8px; margin-bottom: 14px; }
+.start-theme-btn { flex: 1; padding: 10px 6px; border-radius: 14px; border: 2px solid var(--choice-border); background: var(--choice-bg); color: var(--text); font-family: var(--font-body); font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+.start-theme-btn .big { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+.start-theme-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
+.start-ctrl-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.start-ctrl-btn { flex: 1; min-width: 80px; padding: 9px 8px; border-radius: 12px; border: 2px solid var(--choice-border); background: var(--choice-bg); color: var(--text); font-family: var(--font-body); font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; text-align: center; line-height: 1.3; }
+.start-ctrl-btn span { display: block; font-size: 0.65rem; color: var(--subtext); font-weight: 700; margin-top: 2px; }
+.start-ctrl-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
+.start-ctrl-btn.active span { color: rgba(255,255,255,0.8); }
+.start-btn { width: 100%; padding: 15px; border-radius: 16px; border: none; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-family: var(--font-title); font-size: 1.2rem; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 20px var(--btn-shadow); transition: all 0.2s; }
+.start-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+.app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 12px 14px 24px; display: flex; flex-direction: column; gap: 10px; min-height: 100vh; }
+.theme-bar { display: flex; gap: 6px; justify-content: center; }
+.theme-btn { padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--card); color: var(--subtext); font-family: var(--font-body); font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+.theme-btn.active { border-color: var(--accent); color: var(--accent); }
+.hud { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+.hud-info { flex: 1; }
+.hud-title { font-family: var(--font-title); font-size: 1rem; }
+.hud-subtitle { font-size: 0.7rem; color: var(--subtext); font-weight: 700; }
+.lives-display { font-size: 1.2rem; letter-spacing: 2px; }
+.score-pill { background: var(--card2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-weight: 900; font-size: 0.85rem; }
+.story-banner { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px; }
+.story-scene { font-size: 2rem; flex-shrink: 0; }
+.story-text { font-size: 0.85rem; font-weight: 700; line-height: 1.4; }
+.story-sub { font-size: 0.72rem; color: var(--subtext); font-weight: 600; margin-top: 2px; }
+.level-track { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 14px; }
+.level-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.78rem; font-weight: 800; }
+.level-dots { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+.dot { width: 18px; height: 10px; border-radius: 5px; background: var(--choice-border); transition: background 0.3s, transform 0.2s; }
+.dot.filled { background: var(--progress-fill); }
+.dot.just-filled { transform: scaleY(1.4); }
+.correct-counter { font-size: 0.72rem; color: var(--subtext); font-weight: 700; }
+
+/* FRACTION DISPLAY */
+.q-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px 16px; text-align: center; }
+.q-flavor { font-size: 0.8rem; color: var(--subtext); font-weight: 700; margin-bottom: 10px; }
+.q-number { font-family: var(--font-title); font-size: 2rem; margin-bottom: 6px; line-height: 1.3; }
+.fraction-display { display: inline-flex; flex-direction: column; align-items: center; font-family: var(--font-title); font-size: 2.2rem; margin: 0 8px; vertical-align: middle; }
+.frac-line { width: 100%; height: 3px; background: var(--text); border-radius: 2px; margin: 2px 0; }
+.frac-num { font-size: 1.6rem; line-height: 1; }
+.q-story { font-size: 0.75rem; color: var(--subtext); font-weight: 600; }
+
+/* Equivalent fractions dual-pie layout */
+.equiv-row {
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+}
+.equiv-pie-block { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.equiv-label { font-family: var(--font-title); font-size: 1.2rem; }
+.equiv-label.unknown { color: var(--accent2); font-size: 1.5rem; letter-spacing: 2px; }
+.equiv-arrow { font-size: 1.6rem; color: var(--subtext); }
+.equiv-equals { font-family: var(--font-title); font-size: 1.8rem; color: var(--accent2); }
+.equiv-hint { font-size: 0.72rem; color: var(--subtext); font-weight: 700; margin-top: 4px; font-style: italic; }
+
+/* Pie slice fill animation */
+@keyframes slicePop {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.slice-animated { animation: slicePop 0.25s ease forwards; }
+
+/* Settings button in HUD */
+.settings-btn {
+  background: var(--card2); border: 1px solid var(--border);
+  color: var(--subtext); border-radius: 20px; padding: 5px 10px;
+  font-size: 0.7rem; font-weight: 800; font-family: var(--font-body);
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  white-space: nowrap;
+}
+.settings-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.choice { padding: 14px 8px; border-radius: 16px; border: 2px solid var(--choice-border); background: var(--choice-bg); color: var(--text); font-family: var(--font-title); font-size: 1.5rem; cursor: pointer; transition: all 0.16s cubic-bezier(.4,0,.2,1); line-height: 1.4; }
+.choice:hover:not(:disabled) { border-color: var(--accent); background: var(--choice-hover); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.choice:disabled { cursor: not-allowed; }
+.choice:focus { outline: none; }
+.no-transition { transition: none !important; box-shadow: none !important; transform: none !important; background: var(--choice-bg) !important; border-color: var(--choice-border) !important; }
+.choice.correct { background: var(--correct) !important; border-color: var(--correct) !important; color: white; transform: scale(1.05) !important; box-shadow: 0 0 28px rgba(0,230,118,0.5) !important; }
+.choice.wrong { background: var(--wrong) !important; border-color: var(--wrong) !important; color: white !important; animation: shake 0.38s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+
+.feedback { border-radius: 12px; padding: 8px 14px; font-size: 0.85rem; font-weight: 800; text-align: center; min-height: 36px; transition: all 0.2s; }
+.feedback.ok { background: rgba(0,230,118,0.12); color: var(--correct); }
+.feedback.bad { background: rgba(255,82,82,0.12); color: var(--wrong); }
+.streak { text-align: center; font-size: 0.85rem; font-weight: 800; min-height: 24px; color: var(--accent2); }
+
+.overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.overlay.show { opacity: 1; pointer-events: all; }
+.overlay-card { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 28px 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 32px 80px rgba(0,0,0,0.7); }
+.ov-emoji { font-size: 4rem; margin-bottom: 10px; display: block; }
+.ov-title { font-family: var(--font-title); font-size: 1.8rem; margin-bottom: 8px; }
+.ov-story { font-size: 0.85rem; color: var(--subtext); margin-bottom: 14px; line-height: 1.5; font-weight: 600; }
+.ov-meta { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.ov-stat { background: var(--card2); border-radius: 12px; padding: 10px 20px; }
+.ov-stat-val { font-family: var(--font-title); font-size: 2rem; }
+.ov-stat-label { font-size: 0.68rem; color: var(--subtext); font-weight: 700; text-transform: uppercase; }
+.stars-row { font-size: 2rem; margin-bottom: 12px; }
+.ov-btn { width: 100%; padding: 13px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-family: var(--font-title); font-size: 1.1rem; cursor: pointer; margin-bottom: 8px; transition: all 0.2s; box-shadow: 0 4px 16px var(--btn-shadow); }
+.ov-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.ov-btn.secondary { background: var(--card2); color: var(--subtext); box-shadow: none; font-size: 0.9rem; }
+</style>
+</head>
+<body class="theme-farm">
+<div class="bg-layer"></div>
+<div class="life-lost-flash" id="lifeLostFlash"></div>
+<div class="correct-flash" id="correctFlash"></div>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <div class="start-logo" id="startLogo">🥧</div>
+    <div class="start-title">Accuflip Math Adventure</div>
+    <div class="start-tagline">Fractions · 10 levels · 3 lives</div>
+    <input class="name-input" id="nameInput" type="text" placeholder="What's your name?" maxlength="20" />
+    <div class="start-themes">
+      <button class="start-theme-btn active" onclick="selectStartTheme('farm')" id="stbtn-farm"><span class="big">🐔</span>Farm</button>
+      <button class="start-theme-btn" onclick="selectStartTheme('bakery')" id="stbtn-bakery"><span class="big">🥧</span>Bakery</button>
+      <button class="start-theme-btn" onclick="selectStartTheme('pizza')" id="stbtn-pizza"><span class="big">🍕</span>Pizza</button>
+    </div>
+    <div class="start-section-label">Skill Level</div>
+    <div class="start-ctrl-row">
+      <button class="start-ctrl-btn active" onclick="selectStartDiff('easy')" id="sdbtn-easy">🟢 Beginner<span>Halves &amp; quarters</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartDiff('medium')" id="sdbtn-medium">🟡 Growing<span>Up to eighths</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartDiff('hard')" id="sdbtn-hard">🔴 Advanced<span>Compare &amp; equiv.</span></button>
+    </div>
+    <div class="start-section-label">Fraction Type</div>
+    <div class="start-ctrl-row">
+      <button class="start-ctrl-btn active" onclick="selectStartOp('identify')" id="sobtn-identify">🔍 Identify<span>Name the fraction</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('compare')" id="sobtn-compare">⚖️ Compare<span>Which is bigger?</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('equiv')" id="sobtn-equiv">🔗 Equivalent<span>Same value, diff look</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('both')" id="sobtn-both">🔀 Mix All</button>
+    </div>
+    <button class="start-btn" onclick="beginGame()">🎮 Start Adventure!</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp" style="display:none">
+  <div class="theme-bar">
+    <button class="theme-btn active" onclick="setTheme('farm')" id="tbtn-farm">🐔 Farm</button>
+    <button class="theme-btn" onclick="setTheme('bakery')" id="tbtn-bakery">🥧 Bakery</button>
+    <button class="theme-btn" onclick="setTheme('pizza')" id="tbtn-pizza">🍕 Pizza</button>
+  </div>
+  <div class="hud">
+    <div class="hud-info">
+      <div class="hud-title" id="hudTitle">Farm Fractions</div>
+      <div class="hud-subtitle" id="hudSubtitle">Level 1 of 10</div>
+    </div>
+    <div class="lives-display" id="livesDisplay">❤️❤️❤️</div>
+    <div class="score-pill">⭐ <span id="scoreDisplay">0</span></div>
+    <button class="settings-btn" onclick="goToStart()">⚙️ Settings</button>
+  </div>
+  <div class="story-banner">
+    <div class="story-scene" id="storyScene">🌾</div>
+    <div>
+      <div class="story-text" id="storyText">Loading your adventure...</div>
+      <div class="story-sub" id="storySub"></div>
+    </div>
+  </div>
+  <div class="level-track">
+    <div class="level-header">
+      <div class="level-label" id="levelLabel">Level 1</div>
+      <div class="level-count" id="levelCount">0 / 10 correct</div>
+    </div>
+    <div class="level-dots" id="levelDots"></div>
+    <div class="correct-counter">Get <span id="remainingCount">10</span> more correct to advance!</div>
+  </div>
+  <div class="q-card">
+    <div class="q-flavor" id="qFlavor">What fraction is this?</div>
+    <div class="q-number" id="qNumber"></div>
+    <div class="q-story" id="qStory"></div>
+  </div>
+  <div class="choices" id="choicesGrid"></div>
+  <div class="feedback" id="feedbackBar"></div>
+  <div class="streak" id="streakBar"></div>
+</div>
+
+<!-- LEVEL COMPLETE -->
+<div class="overlay" id="levelOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="lvlEmoji">🎉</span>
+    <div class="ov-title" id="lvlTitle">Level Complete!</div>
+    <div class="ov-story" id="lvlStory"></div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="lvlScore">0</div><div class="ov-stat-label">Total Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="lvlNum">1</div><div class="ov-stat-label">Level</div></div>
+    </div>
+    <button class="ov-btn" id="nextLevelBtn" onclick="advanceLevel()">Next Level →</button>
+  </div>
+</div>
+<!-- GAME OVER -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="goEmoji">💔</span>
+    <div class="ov-title">Game Over</div>
+    <div class="ov-story" id="goStory"></div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="goScore">0</div><div class="ov-stat-label">Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="goLevel">1</div><div class="ov-stat-label">Level Reached</div></div>
+    </div>
+    <button class="ov-btn" onclick="restartGame()">Try Again 🔄</button>
+    <button class="ov-btn secondary" onclick="goToStart()">Change Settings</button>
+  </div>
+</div>
+<!-- WIN -->
+<div class="overlay" id="winOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji">🏆</span>
+    <div class="ov-title" id="winTitle">YOU WIN!</div>
+    <div class="ov-story" id="winStory"></div>
+    <div class="stars-row" id="winStars">⭐⭐⭐</div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="winScore">0</div><div class="ov-stat-label">Final Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="winLives">3</div><div class="ov-stat-label">Lives Left</div></div>
+    </div>
+    <button class="ov-btn" onclick="restartGame()">Play Again 🔄</button>
+    <button class="ov-btn secondary" onclick="goToStart()">New Adventure</button>
+  </div>
+</div>
+
+<script>
+const STORIES = {
+  farm: {
+    icon:'🐔', title:'Farm Fractions',
+    levels:[
+      {place:'The Chicken Coop',scene:'🐔'},{place:'The Pig Pen',scene:'🐷'},{place:'The Cow Pasture',scene:'🐄'},
+      {place:'The Apple Orchard',scene:'🍎'},{place:'The Pumpkin Patch',scene:'🎃'},{place:'The Cornfield',scene:'🌽'},
+      {place:'The Vegetable Garden',scene:'🥕'},{place:'The Hay Barn',scene:'🌾'},{place:'The Farmer\'s Market',scene:'🛒'},
+      {place:'The Big Red Barn',scene:'🏚️'},
+    ],
+    flavors:{identify:['What fraction is shaded?','Name this fraction!','What part is shown?'], compare:['Which is bigger?','Greater fraction?','More of the whole?']},
+    correct:['Cluck-tastic! 🐔','Hay yeah! 🌾','Oink-credible! 🐷','Moo-velous! 🐄','You harvested it! 🍎'],
+    wrong:['The rooster disagrees! 🐔','Spilled the milk! 🐄','Hay, not quite! 🌾','The pig says no! 🐷'],
+    win: name => `${name} mastered the whole farm! 🏆 Every fraction accounted for!`,
+    gameOver: name => `${name} dropped the eggs... Try again!`,
+  },
+  bakery: {
+    icon:'🥧', title:'Bakery Fractions',
+    levels:[
+      {place:'The Flour Room',scene:'🌾'},{place:'The Mixing Station',scene:'🥣'},{place:'The Oven Room',scene:'🔥'},
+      {place:'The Cooling Rack',scene:'🍞'},{place:'The Pie Counter',scene:'🥧'},{place:'The Cake Display',scene:'🎂'},
+      {place:'The Cookie Corner',scene:'🍪'},{place:'The Frosting Lab',scene:'🧁'},{place:'The Bread Vault',scene:'🥖'},
+      {place:'The Grand Bakery',scene:'🏪'},
+    ],
+    flavors:{identify:['What fraction was eaten?','How much remains?','Name the slice!'], compare:['Which slice is bigger?','More pie?','Greater portion?']},
+    correct:['Fresh from the oven! 🥧','Perfectly baked! 🎂','Delicious maths! 🍰','Baker\'s dozen of brains! 🍞','Sweet accuracy! 🧁'],
+    wrong:['Dropped the cake! 🎂','That slice is wrong! 🥧','Oops, overbaked! ❌','The recipe disagrees! 📖'],
+    win: name => `${name} baked the perfect fraction pie! 🏆 A masterpiece!`,
+    gameOver: name => `${name}'s soufflé fell... Back to the oven!`,
+  },
+  pizza: {
+    icon:'🍕', title:'Pizza Fractions',
+    levels:[
+      {place:'The Dough Station',scene:'🫓'},{place:'The Sauce Pit',scene:'🍅'},{place:'The Cheese Cave',scene:'🧀'},
+      {place:'The Topping Bar',scene:'🫑'},{place:'The Pizza Oven',scene:'🔥'},{place:'The Slice Counter',scene:'🍕'},
+      {place:'The Party Table',scene:'🎉'},{place:'The Second Pie',scene:'🍕'},{place:'The Champion\'s Kitchen',scene:'👨‍🍳'},
+      {place:'Pizza Hall of Fame',scene:'🏆'},
+    ],
+    flavors:{identify:['What fraction of pizza is left?','How much was eaten?','Name the slice!'], compare:['Whose slice is bigger?','More pizza?','Larger portion?']},
+    correct:['That\'s a slice of genius! 🍕','Pizza perfect! 🍅','Mamma mia! 🤌','Pepperoni precise! 🍕','Topping tier answer! 🧀'],
+    wrong:['Wrong topping! 🫑','That slice has anchovies! 🐟','The chef disagrees! 👨‍🍳','Cold pizza answer! ❌'],
+    win: name => `${name} ate through all the fractions! 🏆 Full pizza mastery!`,
+    gameOver: name => `${name} dropped the pizza... Cheese side down! Try again!`,
+  },
+};
+
+// Fraction data: denominators and display helper
+const DENOM_EASY = [2, 3, 4];
+const DENOM_MED = [2, 3, 4, 5, 6, 8];
+const DENOM_HARD = [2, 3, 4, 5, 6, 8, 10, 12];
+
+const TOTAL_LEVELS = 10;
+const CORRECT_TO_ADVANCE = 10;
+const MAX_LIVES = 3;
+
+let state = { level:1, lives:MAX_LIVES, score:0, correctThisLevel:0, streak:0, theme:'farm', diff:'easy', op:'identify', playerName:'Explorer', currentAnswer:'', answered:false, currentQ:null };
+let startTheme = 'farm';
+let startDiff = 'easy';
+let startOp = 'identify';
+
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function getDenoms() {
+  if (state.diff === 'easy') return DENOM_EASY;
+  if (state.diff === 'medium') return DENOM_MED;
+  return DENOM_HARD;
+}
+
+function fracStr(num, den) { return `${num}/${den}`; }
+function fracVal(num, den) { return num / den; }
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function simplify(num, den) { const g = gcd(num, den); return { num: num/g, den: den/g }; }
+
+// Equivalent fraction families: [smallDen, bigDen] pairs
+const EQUIV_FAMILIES = [
+  [2,4],[2,6],[2,8],[2,10],[2,12],
+  [3,6],[3,9],[3,12],
+  [4,8],[4,12],
+  [5,10],
+  [6,12],
+];
+
+function getDenoms() {
+  if (state.diff === 'easy') return [2, 3, 4];
+  if (state.diff === 'medium') return [2, 3, 4, 5, 6, 8];
+  return [2, 3, 4, 5, 6, 8, 10, 12];
+}
+
+function genFraction() {
+  const denoms = getDenoms();
+  const den = denoms[rand(0, denoms.length-1)];
+  const num = rand(1, den-1);
+  return { num, den, str: fracStr(num, den), val: fracVal(num, den) };
+}
+
+function fracHTML(num, den) {
+  return `<span class="fraction-display"><span class="frac-num">${num}</span><div class="frac-line"></div><span class="frac-num">${den}</span></span>`;
+}
+
+function genEquivQuestion() {
+  // Pick a valid equiv family based on difficulty
+  const availFamilies = EQUIV_FAMILIES.filter(([s, b]) =>
+    getDenoms().includes(s) && getDenoms().includes(b)
+  );
+  if (!availFamilies.length) return null;
+  const [smallDen, bigDen] = availFamilies[rand(0, availFamilies.length-1)];
+  const multiplier = bigDen / smallDen;
+
+  // Pick a numerator for the small fraction (avoid 0 and full)
+  const smallNum = rand(1, smallDen - 1);
+  const bigNum = smallNum * multiplier;
+
+  // The question shows the big fraction (lots of slices) and asks for the equivalent small fraction
+  const shown = { num: bigNum, den: bigDen };
+  const answer = { num: smallNum, den: smallDen };
+
+  return {
+    type: 'equiv',
+    shown,   // the complex fraction shown (e.g. 4/16 or 2/8)
+    answer,  // the simplified equivalent (e.g. 1/4 or 1/4)
+    answerStr: fracStr(smallNum, smallDen),
+    flavor: 'These two pies are the SAME size — what simpler fraction matches? 🔗',
+  };
+}
+
+function genQuestion() {
+  const roll = Math.random();
+
+  if (state.op === 'equiv') {
+    return genEquivQuestion() || genIdentifyQuestion();
+  }
+  if (state.op === 'compare') return genCompareQuestion();
+  if (state.op === 'identify') return genIdentifyQuestion();
+
+  // 'both' = mix all three
+  if (roll < 0.4) return genIdentifyQuestion();
+  if (roll < 0.7 && state.diff !== 'easy') return genEquivQuestion() || genIdentifyQuestion();
+  if (state.diff !== 'easy') return genCompareQuestion();
+  return genIdentifyQuestion();
+}
+
+function genIdentifyQuestion() {
+  const f = genFraction();
+  return {
+    type: 'identify',
+    display: renderPieSVG(f.num, f.den, 90, true),
+    answer: f.str, f,
+    flavor: STORIES[state.theme].flavors.identify[rand(0, 2)],
+  };
+}
+
+function genCompareQuestion() {
+  const f1 = genFraction();
+  let f2;
+  do { f2 = genFraction(); } while (f2.str === f1.str && Math.abs(f1.val - f2.val) < 0.01);
+  const bigger = f1.val >= f2.val ? f1 : f2;
+  return {
+    type: 'compare',
+    display: `${fracHTML(f1.num, f1.den)} or ${fracHTML(f2.num, f2.den)} ?`,
+    answer: bigger.str, f1, f2,
+    flavor: 'Which is the BIGGER fraction?',
+  };
+}
+
+function renderPieSVG(num, den, size, animated, color) {
+  const cx = size/2, cy = size/2, r = size/2 - 3;
+  const fillColor = color || 'var(--accent)';
+  let paths = '';
+  for (let i = 0; i < den; i++) {
+    const startAngle = (i / den) * 2 * Math.PI - Math.PI/2;
+    const endAngle = ((i+1) / den) * 2 * Math.PI - Math.PI/2;
+    const x1 = cx + r * Math.cos(startAngle);
+    const y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const large = (1/den) > 0.5 ? 1 : 0;
+    const filled = i < num;
+    const animStyle = (animated && filled) ? `style="animation: slicePop 0.25s ease ${i * 0.07}s both"` : '';
+    paths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${filled ? fillColor : 'var(--choice-bg)'}" stroke="var(--text)" stroke-width="1.5" stroke-opacity="0.5" ${animStyle}/>`;
+  }
+  // Outer ring
+  paths += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-opacity="0.3"/>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="display:block">${paths}</svg>`;
+}
+
+function renderEquivDisplay(q) {
+  // Left: the big complex fraction (animated slices filling in)
+  // Right: question mark pie (empty, same size portions as the answer)
+  const shownSVG = renderPieSVG(q.shown.num, q.shown.den, 90, true, 'var(--accent)');
+  // Right pie: show the answer denominator with empty slices and "?" overlay
+  const hiddenSVG = renderPieSVG(0, q.answer.den, 90, false, 'var(--accent2)');
+
+  return `
+  <div class="equiv-row">
+    <div class="equiv-pie-block">
+      ${shownSVG}
+      <div class="equiv-label">${fracHTML(q.shown.num, q.shown.den)}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="equiv-equals">=</div>
+      <div class="equiv-hint">same amount!</div>
+    </div>
+    <div class="equiv-pie-block">
+      ${hiddenSVG}
+      <div class="equiv-label unknown">?</div>
+    </div>
+  </div>`;
+}
+
+function renderPieHTML(num, den) {
+  return renderPieSVG(num, den, 90, true);
+}
+
+function genChoices(q) {
+  if (q.type === 'compare') {
+    return [q.f1.str, q.f2.str].sort(() => Math.random() - 0.5);
+  }
+  if (q.type === 'equiv') {
+    // Correct answer + 3 plausible wrong equivalents (same denominator family or nearby)
+    const pool = new Set([q.answerStr]);
+    const answerDen = q.answer.den;
+    let attempts = 0;
+    while (pool.size < 4 && attempts < 60) {
+      attempts++;
+      // Mix of: same den wrong num, different den wrong fraction
+      const useSameDen = Math.random() < 0.5;
+      if (useSameDen) {
+        const wrongNum = rand(1, answerDen - 1);
+        const s = fracStr(wrongNum, answerDen);
+        if (s !== q.answerStr) pool.add(s);
+      } else {
+        const denoms = getDenoms();
+        const wrongDen = denoms[rand(0, denoms.length-1)];
+        const wrongNum = rand(1, wrongDen-1);
+        const s = fracStr(wrongNum, wrongDen);
+        if (s !== q.answerStr) pool.add(s);
+      }
+    }
+    return [...pool].sort(() => Math.random() - 0.5);
+  }
+  // identify
+  const pool = new Set([q.answer]);
+  const denoms = getDenoms();
+  let attempts = 0;
+  while (pool.size < 4 && attempts < 40) {
+    attempts++;
+    const den = denoms[rand(0, denoms.length-1)];
+    const num = rand(1, den-1);
+    const s = fracStr(num, den);
+    if (!pool.has(s)) pool.add(s);
+  }
+  return [...pool].sort(() => Math.random() - 0.5);
+}
+
+function renderChoiceBtn(val) {
+  const parts = val.split('/');
+  return fracHTML(parts[0], parts[1]);
+}
+
+function selectStartTheme(t) {
+  startTheme = t;
+  document.body.className = 'theme-' + t;
+  document.querySelectorAll('.start-theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('stbtn-' + t).classList.add('active');
+  document.getElementById('startLogo').textContent = STORIES[t].icon;
+}
+function selectStartDiff(d) {
+  startDiff = d;
+  document.querySelectorAll('[id^=sdbtn-]').forEach(b => b.classList.remove('active'));
+  document.getElementById('sdbtn-' + d).classList.add('active');
+}
+function selectStartOp(o) {
+  startOp = o;
+  document.querySelectorAll('[id^=sobtn-]').forEach(b => b.classList.remove('active'));
+  document.getElementById('sobtn-' + o).classList.add('active');
+}
+function beginGame() {
+  state.playerName = document.getElementById('nameInput').value.trim() || 'Explorer';
+  state.theme = startTheme; state.diff = startDiff; state.op = startOp;
+  document.body.className = 'theme-' + state.theme;
+  document.getElementById('startScreen').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    initGame();
+  }, 400);
+}
+function setTheme(t) {
+  state.theme = t; document.body.className = 'theme-' + t;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tbtn-' + t).classList.add('active');
+  updateStoryBanner(); updateHUD();
+}
+function initGame() {
+  state.level = 1; state.lives = MAX_LIVES; state.score = 0; state.correctThisLevel = 0; state.streak = 0;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tbtn-' + state.theme).classList.add('active');
+  updateLives(); updateHUD(); updateStoryBanner(); buildDots(); loadQuestion();
+}
+function updateHUD() {
+  const s = STORIES[state.theme];
+  document.getElementById('hudTitle').textContent = s.title;
+  document.getElementById('hudSubtitle').textContent = `Level ${state.level} of ${TOTAL_LEVELS}`;
+  document.getElementById('levelLabel').textContent = `Level ${state.level}`;
+  document.getElementById('levelCount').textContent = `${state.correctThisLevel} / ${CORRECT_TO_ADVANCE} correct`;
+  document.getElementById('remainingCount').textContent = CORRECT_TO_ADVANCE - state.correctThisLevel;
+  document.getElementById('scoreDisplay').textContent = state.score;
+}
+function updateLives() {
+  document.getElementById('livesDisplay').textContent = '❤️'.repeat(state.lives) + '🖤'.repeat(MAX_LIVES - state.lives);
+}
+function updateStoryBanner() {
+  const s = STORIES[state.theme];
+  const lvl = s.levels[state.level - 1];
+  document.getElementById('storyScene').textContent = lvl.scene;
+  document.getElementById('storyText').textContent = `${state.playerName} is at ${lvl.place}`;
+  document.getElementById('storySub').textContent = s.title;
+}
+function buildDots() {
+  const container = document.getElementById('levelDots');
+  container.innerHTML = '';
+  for (let i = 0; i < CORRECT_TO_ADVANCE; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < state.correctThisLevel ? ' filled' : '');
+    container.appendChild(d);
+  }
+}
+function updateDots() {
+  const dots = document.querySelectorAll('.dot');
+  const idx = state.correctThisLevel - 1;
+  if (dots[idx]) { dots[idx].classList.add('filled','just-filled'); setTimeout(() => dots[idx].classList.remove('just-filled'), 300); }
+  updateHUD();
+}
+function loadQuestion() {
+  state.answered = false;
+  const q = genQuestion();
+  state.currentAnswer = q.type === 'equiv' ? q.answerStr : q.answer;
+  state.currentQ = q;
+
+  document.getElementById('qFlavor').textContent = q.flavor;
+
+  if (q.type === 'equiv') {
+    document.getElementById('qNumber').innerHTML = renderEquivDisplay(q);
+    document.getElementById('qStory').textContent = `${STORIES[state.theme].levels[state.level-1].place} — Tap the matching fraction!`;
+  } else if (q.type === 'identify') {
+    document.getElementById('qNumber').innerHTML = q.display;
+    document.getElementById('qStory').textContent = `${STORIES[state.theme].levels[state.level-1].place} — Tap your answer!`;
+  } else {
+    document.getElementById('qNumber').innerHTML = q.display;
+    document.getElementById('qStory').textContent = `${STORIES[state.theme].levels[state.level-1].place} — Tap the bigger fraction!`;
+  }
+
+  const oldGrid = document.getElementById('choicesGrid');
+  const newGrid = document.createElement('div');
+  newGrid.className = oldGrid.className; newGrid.id = 'choicesGrid';
+  oldGrid.parentNode.replaceChild(newGrid, oldGrid);
+
+  const choices = genChoices(q);
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice no-transition';
+    btn.innerHTML = renderChoiceBtn(c);
+    btn.dataset.val = c;
+    btn.onclick = () => handleAnswer(btn, c);
+    newGrid.appendChild(btn);
+  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    newGrid.querySelectorAll('.choice').forEach(b => b.classList.remove('no-transition'));
+  }));
+
+  document.getElementById('feedbackBar').className = 'feedback';
+  document.getElementById('feedbackBar').textContent = '';
+  updateStreak();
+}
+function handleAnswer(btn, chosen) {
+  if (state.answered) return;
+  state.answered = true;
+  btn.blur();
+  const correct = chosen === state.currentAnswer;
+  const s = STORIES[state.theme];
+  const fb = document.getElementById('feedbackBar');
+
+  document.querySelectorAll('.choice').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.val === state.currentAnswer) b.classList.add('correct');
+  });
+
+  if (correct) {
+    btn.classList.add('correct');
+    state.score++; state.correctThisLevel++; state.streak++;
+    document.getElementById('scoreDisplay').textContent = state.score;
+    fb.className = 'feedback ok';
+    // For equiv: show the relationship clearly
+    if (state.currentQ.type === 'equiv') {
+      fb.textContent = s.correct[rand(0, s.correct.length-1)] + ` ${state.currentQ.shown.num}/${state.currentQ.shown.den} = ${state.currentQ.answer.num}/${state.currentQ.answer.den} ✓`;
+    } else {
+      fb.textContent = s.correct[rand(0, s.correct.length-1)];
+    }
+    const cf = document.getElementById('correctFlash');
+    cf.classList.remove('flash'); void cf.offsetWidth; cf.classList.add('flash');
+    updateDots(); updateHUD(); updateStreak();
+    if (state.correctThisLevel >= CORRECT_TO_ADVANCE) { playLevelUp(); setTimeout(() => showLevelComplete(), 700); }
+    else { playCorrect(); setTimeout(() => loadQuestion(), 900); }
+  } else {
+    btn.classList.add('wrong');
+    state.streak = 0; state.lives--;
+    const answerParts = state.currentAnswer.split('/');
+    fb.className = 'feedback bad';
+    if (state.currentQ && state.currentQ.type === 'equiv') {
+      fb.textContent = s.wrong[rand(0, s.wrong.length-1)] + ` (${state.currentQ.shown.num}/${state.currentQ.shown.den} = ${answerParts[0]}/${answerParts[1]})`;
+    } else {
+      fb.textContent = s.wrong[rand(0, s.wrong.length-1)] + ` (Answer: ${answerParts[0]}/${answerParts[1]})`;
+    }
+    const lf = document.getElementById('lifeLostFlash');
+    lf.classList.remove('flash'); void lf.offsetWidth; lf.classList.add('flash');
+    updateLives(); updateStreak();
+    if (state.lives <= 0) { playGameOver(); setTimeout(() => showGameOver(), 900); }
+    else { playLifeLost(); setTimeout(() => loadQuestion(), 1000); }
+  }
+}
+function updateStreak() {
+  const sb = document.getElementById('streakBar');
+  sb.textContent = state.streak >= 3 ? `🔥 ${state.streak} in a row!` : '';
+}
+function showLevelComplete() {
+  const s = STORIES[state.theme];
+  document.getElementById('lvlEmoji').textContent = s.icon;
+  document.getElementById('lvlTitle').textContent = state.level >= TOTAL_LEVELS ? '🏆 All Levels Done!' : `Level ${state.level} Complete!`;
+  document.getElementById('lvlStory').textContent = s.levels[state.level-1].place + ' — fraction mastered!';
+  document.getElementById('lvlScore').textContent = state.score;
+  document.getElementById('lvlNum').textContent = state.level;
+  document.getElementById('nextLevelBtn').textContent = state.level >= TOTAL_LEVELS ? '🏆 Claim Victory!' : 'Next Level →';
+  document.getElementById('levelOverlay').classList.add('show');
+}
+function advanceLevel() {
+  document.getElementById('levelOverlay').classList.remove('show');
+  if (state.level >= TOTAL_LEVELS) { showWin(); return; }
+  state.level++; state.correctThisLevel = 0;
+  updateHUD(); updateStoryBanner(); buildDots(); loadQuestion();
+}
+function showGameOver() {
+  document.getElementById('goEmoji').textContent = STORIES[state.theme].icon;
+  document.getElementById('goStory').textContent = STORIES[state.theme].gameOver(state.playerName);
+  document.getElementById('goScore').textContent = state.score;
+  document.getElementById('goLevel').textContent = state.level;
+  document.getElementById('gameOverOverlay').classList.add('show');
+}
+function showWin() {
+  playWin();
+  const stars = state.lives===3?'⭐⭐⭐':state.lives===2?'⭐⭐☆':'⭐☆☆';
+  document.getElementById('winTitle').textContent = `${state.playerName} Wins!`;
+  document.getElementById('winStory').textContent = STORIES[state.theme].win(state.playerName);
+  document.getElementById('winStars').textContent = stars;
+  document.getElementById('winScore').textContent = state.score;
+  document.getElementById('winLives').textContent = state.lives;
+  document.getElementById('winOverlay').classList.add('show');
+}
+function restartGame() { hideAllOverlays(); initGame(); }
+function goToStart() {
+  hideAllOverlays();
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+function hideAllOverlays() {
+  ['levelOverlay','gameOverOverlay','winOverlay'].forEach(id => document.getElementById(id).classList.remove('show'));
+}
+
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function chipNote(freq, startTime, duration, type='square', vol=0.18, ctx) {
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = type; osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(vol, startTime); gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.start(startTime); osc.stop(startTime + duration);
+}
+function playCorrect() { try { const ctx=getAudio(),t=ctx.currentTime; [261,329,392].forEach((f,i)=>chipNote(f,t+i*0.08,0.15,'square',0.15,ctx)); } catch(e){} }
+function playLifeLost() { try { const ctx=getAudio(),t=ctx.currentTime; [330,277,220,185].forEach((f,i)=>chipNote(f,t+i*0.1,0.18,'sawtooth',0.14,ctx)); } catch(e){} }
+function playGameOver() { try { const ctx=getAudio(),t=ctx.currentTime; [220,196,175,165].forEach((f,i)=>chipNote(f,t+i*0.18,0.3,'sawtooth',0.16,ctx)); } catch(e){} }
+function playLevelUp() { try { const ctx=getAudio(),t=ctx.currentTime; [330,392,494,659].forEach((f,i)=>chipNote(f,t+i*0.1,0.2,'square',0.16,ctx)); chipNote(659,t+0.5,0.4,'square',0.18,ctx); } catch(e){} }
+function playWin() { try { const ctx=getAudio(),t=ctx.currentTime; [261,294,329,349,392,440,494,523,659].forEach((f,i)=>chipNote(f,t+i*0.1,0.2,'square',0.16,ctx)); } catch(e){} }
+</script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accuflip Math Adventure — Complete Pack</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-title: 'Fredoka One', cursive;
+  --font-body: 'Nunito', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: var(--font-body); }
+
+/* ═══════════ HUB ═══════════ */
+.hub {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #060d18 0%, #0c1628 60%, #080e1e 100%);
+  color: #f0f4ff;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 16px 48px;
+  position: relative; overflow: hidden;
+}
+.hub.hidden { display: none; }
+
+/* Starfield */
+.hub::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 80%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 90%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.4) 0%, transparent 100%);
+}
+
+.hub-logo { font-size: 4rem; margin-bottom: 8px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.hub-title { font-family: var(--font-title); font-size: 2.2rem; text-align: center; margin-bottom: 4px; background: linear-gradient(135deg, #fff 0%, #a0c4ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hub-subtitle { font-size: 0.85rem; color: #6080a0; font-weight: 700; text-align: center; margin-bottom: 32px; letter-spacing: 0.5px; }
+
+.hub-grid {
+  display: flex; flex-direction: column; gap: 16px;
+  width: 100%; max-width: 460px;
+}
+
+.game-card {
+  background: linear-gradient(135deg, var(--card-from), var(--card-to));
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 22px 22px 18px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
+  box-shadow: 0 8px 32px var(--card-shadow);
+}
+.game-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.game-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 16px 48px var(--card-shadow); }
+
+.game-card.add-sub { --card-from: #12213a; --card-to: #0e1830; --card-border: rgba(232,72,85,0.25); --card-shadow: rgba(232,72,85,0.2); }
+.game-card.mult-div { --card-from: #0a1f0a; --card-to: #061406; --card-border: rgba(76,175,80,0.25); --card-shadow: rgba(76,175,80,0.2); }
+.game-card.fractions { --card-from: #1f1200; --card-to: #150d00; --card-border: rgba(255,140,0,0.25); --card-shadow: rgba(255,140,0,0.2); }
+
+.card-top { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.card-emoji { font-size: 3rem; flex-shrink: 0; }
+.card-info { flex: 1; }
+.card-title { font-family: var(--font-title); font-size: 1.35rem; margin-bottom: 2px; }
+.card-sub { font-size: 0.75rem; color: rgba(255,255,255,0.55); font-weight: 700; }
+.card-badge {
+  font-size: 0.65rem; font-weight: 900; padding: 3px 10px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: var(--badge-bg); color: var(--badge-text);
+  border: 1px solid var(--badge-border);
+  flex-shrink: 0;
+}
+.game-card.add-sub .card-badge { --badge-bg: rgba(232,72,85,0.15); --badge-text: #f08090; --badge-border: rgba(232,72,85,0.3); }
+.game-card.mult-div .card-badge { --badge-bg: rgba(76,175,80,0.15); --badge-text: #80c880; --badge-border: rgba(76,175,80,0.3); }
+.game-card.fractions .card-badge { --badge-bg: rgba(255,140,0,0.15); --badge-text: #ffb060; --badge-border: rgba(255,140,0,0.3); }
+
+.card-themes { display: flex; gap: 6px; font-size: 0.78rem; color: rgba(255,255,255,0.45); font-weight: 700; flex-wrap: wrap; }
+.card-theme-tag { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 2px 8px; }
+
+.card-play-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.card-stats { font-size: 0.72rem; color: rgba(255,255,255,0.4); font-weight: 700; }
+.card-play-btn {
+  padding: 8px 20px; border-radius: 30px; border: none;
+  background: var(--btn-grad); color: white;
+  font-family: var(--font-title); font-size: 0.95rem;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 14px var(--card-shadow);
+}
+.game-card.add-sub .card-play-btn { --btn-grad: linear-gradient(135deg, #e84855, #f5a623); }
+.game-card.mult-div .card-play-btn { --btn-grad: linear-gradient(135deg, #4caf50, #8bc34a); }
+.game-card.fractions .card-play-btn { --btn-grad: linear-gradient(135deg, #ff8c00, #ffd700); }
+.card-play-btn:hover { transform: scale(1.05); }
+
+.hub-footer { margin-top: 32px; text-align: center; font-size: 0.7rem; color: #2a3a50; font-weight: 700; letter-spacing: 1px; }
+
+/* ═══════════ GAME WRAPPER ═══════════ */
+.game-wrapper {
+  display: none;
+  position: fixed; inset: 0; z-index: 50;
+  background: #0e1623;
+  flex-direction: column;
+}
+.game-wrapper.active { display: flex; }
+
+.game-back-bar {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0; z-index: 100; position: relative;
+}
+.back-btn {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  color: #a0b8d0; border-radius: 20px; padding: 6px 14px;
+  font-family: var(--font-body); font-weight: 800; font-size: 0.8rem;
+  cursor: pointer; transition: all 0.2s;
+}
+.back-btn:hover { background: rgba(255,255,255,0.18); color: white; }
+.back-bar-title { font-family: var(--font-title); font-size: 0.95rem; color: rgba(255,255,255,0.7); }
+
+.game-frame-container { flex: 1; overflow: hidden; position: relative; }
+.game-frame {
+  width: 100%; height: 100%; border: none;
+  display: block;
+}
+
+/* ═══════════ GAME SCREENS (inline) ═══════════ */
+/* Each game runs in its own scrollable div inside the wrapper */
+.game-inner {
+  flex: 1; overflow-y: auto;
+  background: linear-gradient(160deg, var(--g-bg) 0%, var(--g-bg2) 100%);
+  position: relative;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ HUB SCREEN ═══════ -->
+<div class="hub" id="hub">
+  <div class="hub-logo">🎮</div>
+  <div class="hub-title">Accuflip Math Adventure</div>
+  <div class="hub-subtitle">COMPLETE PACK — Choose Your Adventure</div>
+
+  <div class="hub-grid">
+
+    <!-- Addition & Subtraction -->
+    <div class="game-card add-sub" onclick="launchGame('addsub')">
+      <div class="card-top">
+        <div class="card-emoji">➕</div>
+        <div class="card-info">
+          <div class="card-title">Addition &amp; Subtraction</div>
+          <div class="card-sub">The foundation of all math</div>
+        </div>
+        <div class="card-badge">Grades 1–3</div>
+      </div>
+      <div class="card-themes">
+        <span class="card-theme-tag">🚂 Train</span>
+        <span class="card-theme-tag">👸 Princess</span>
+        <span class="card-theme-tag">🚀 Space</span>
+      </div>
+      <div class="card-play-row">
+        <div class="card-stats">10 levels · 3 lives · Easy to Hard</div>
+        <button class="card-play-btn">Play ▶</button>
+      </div>
+    </div>
+
+    <!-- Multiplication & Division -->
+    <div class="game-card mult-div" onclick="launchGame('multdiv')">
+      <div class="card-top">
+        <div class="card-emoji">✖️</div>
+        <div class="card-info">
+          <div class="card-title">Multiplication &amp; Division</div>
+          <div class="card-sub">Times tables &amp; fact families</div>
+        </div>
+        <div class="card-badge">Grades 2–4</div>
+      </div>
+      <div class="card-themes">
+        <span class="card-theme-tag">🦁 Jungle</span>
+        <span class="card-theme-tag">🐬 Ocean</span>
+        <span class="card-theme-tag">🚀 Space</span>
+      </div>
+      <div class="card-play-row">
+        <div class="card-stats">10 levels · 3 lives · ×2 to ×12</div>
+        <button class="card-play-btn">Play ▶</button>
+      </div>
+    </div>
+
+    <!-- Fractions -->
+    <div class="game-card fractions" onclick="launchGame('fractions')">
+      <div class="card-top">
+        <div class="card-emoji">🥧</div>
+        <div class="card-info">
+          <div class="card-title">Fractions</div>
+          <div class="card-sub">Identify, compare &amp; understand</div>
+        </div>
+        <div class="card-badge">Grades 2–5</div>
+      </div>
+      <div class="card-themes">
+        <span class="card-theme-tag">🐔 Farm</span>
+        <span class="card-theme-tag">🥧 Bakery</span>
+        <span class="card-theme-tag">🍕 Pizza</span>
+      </div>
+      <div class="card-play-row">
+        <div class="card-stats">10 levels · 3 lives · Halves to Twelfths</div>
+        <button class="card-play-btn">Play ▶</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hub-footer">ACCUFLIP MATH ADVENTURE — COMPLETE PACK</div>
+</div>
+
+<!-- ═══════ GAME WRAPPER ═══════ -->
+<div class="game-wrapper" id="gameWrapper">
+  <div class="game-back-bar">
+    <button class="back-btn" onclick="returnToHub()">← Back to Games</button>
+    <div class="back-bar-title" id="backBarTitle">Accuflip Math Adventure</div>
+  </div>
+  <div class="game-frame-container">
+    <iframe class="game-frame" id="gameFrame" src="about:blank" allow="autoplay"></iframe>
+  </div>
+</div>
+
+<script>
+const GAME_FILES = {
+  addsub:    'accuflip-math-adventure.html',
+  multdiv:   'accuflip-mult-div.html',
+  fractions: 'accuflip-fractions.html',
+};
+const GAME_TITLES = {
+  addsub:    'Addition & Subtraction',
+  multdiv:   'Multiplication & Division',
+  fractions: 'Fractions',
+};
+
+let currentGame = null;
+
+function launchGame(key) {
+  currentGame = key;
+  const frame = document.getElementById('gameFrame');
+  document.getElementById('backBarTitle').textContent = GAME_TITLES[key];
+  frame.src = GAME_FILES[key];
+  document.getElementById('hub').classList.add('hidden');
+  document.getElementById('gameWrapper').classList.add('active');
+  // Prevent scroll bleed
+  document.body.style.overflow = 'hidden';
+}
+
+function returnToHub() {
+  const frame = document.getElementById('gameFrame');
+  frame.src = 'about:blank';
+  document.getElementById('gameWrapper').classList.remove('active');
+  document.getElementById('hub').classList.remove('hidden');
+  document.body.style.overflow = '';
+  currentGame = null;
+}
+</script>
+</body>
+</html>

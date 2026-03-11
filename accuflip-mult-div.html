@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accuflip Math Adventure: Multiplication &amp; Division</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1623; --bg2: #131f30; --card: #1a2a40; --card2: #1e3050;
+  --accent: #e84855; --accent2: #f5a623; --text: #f0f4ff; --subtext: #7a90b0;
+  --border: rgba(255,255,255,0.08); --correct: #00c896; --wrong: #e84855;
+  --life: #e84855; --progress-fill: #e84855; --btn-shadow: rgba(232,72,85,0.4);
+  --choice-bg: #1a2f50; --choice-border: #243d60; --choice-hover: #1e3a68;
+  --font-title: 'Fredoka One', cursive; --font-body: 'Nunito', sans-serif;
+}
+body.theme-jungle {
+  --bg: #0a1a0a; --bg2: #0d220d; --card: #122012; --card2: #162816;
+  --accent: #4caf50; --accent2: #ffeb3b; --text: #f0fff0; --subtext: #7ab07a;
+  --border: rgba(100,200,100,0.12); --correct: #69f0ae; --wrong: #ff5252;
+  --life: #ff7043; --progress-fill: #4caf50; --btn-shadow: rgba(76,175,80,0.5);
+  --choice-bg: #122012; --choice-border: #1e3a1e; --choice-hover: #1a2e1a;
+}
+body.theme-ocean {
+  --bg: #001a2e; --bg2: #002240; --card: #003056; --card2: #003a68;
+  --accent: #00bcd4; --accent2: #ff9800; --text: #e0f7fa; --subtext: #6096a0;
+  --border: rgba(0,188,212,0.15); --correct: #00e5ff; --wrong: #ff5252;
+  --life: #ff6090; --progress-fill: #00bcd4; --btn-shadow: rgba(0,188,212,0.5);
+  --choice-bg: #002a4a; --choice-border: #004070; --choice-hover: #003460;
+}
+body.theme-space {
+  --bg: #050510; --bg2: #080820; --card: #0d0d30; --card2: #101040;
+  --accent: #7c4dff; --accent2: #00e5ff; --text: #e8e8ff; --subtext: #6060a0;
+  --border: rgba(124,77,255,0.15); --correct: #00e5ff; --wrong: #ff4d6d;
+  --life: #ff6090; --progress-fill: #7c4dff; --btn-shadow: rgba(124,77,255,0.5);
+  --choice-bg: #0d0d30; --choice-border: #1a1a50; --choice-hover: #121245;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  transition: background 0.5s, color 0.3s;
+}
+.bg-layer {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 20% 20%, var(--accent) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, var(--accent2) 0%, transparent 50%);
+  opacity: 0.04;
+}
+.life-lost-flash {
+  position: fixed; inset: 0; pointer-events: none; z-index: 999;
+  background: var(--wrong); opacity: 0; transition: opacity 0.1s;
+}
+.life-lost-flash.flash { animation: flashRed 0.5s ease; }
+.correct-flash {
+  position: fixed; inset: 0; pointer-events: none; z-index: 999;
+  background: var(--correct); opacity: 0;
+}
+.correct-flash.flash { animation: flashGreen 0.4s ease; }
+@keyframes flashRed { 0%,100%{opacity:0} 30%{opacity:0.18} }
+@keyframes flashGreen { 0%,100%{opacity:0} 20%{opacity:0.12} }
+
+/* START SCREEN */
+.start-screen {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%);
+  transition: opacity 0.4s;
+  overflow-y: auto;
+}
+.start-screen.hidden { opacity: 0; pointer-events: none; }
+.start-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 28px 24px;
+  width: 100%; max-width: 440px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  position: relative; z-index: 1;
+}
+.start-logo { font-size: 3.5rem; text-align: center; margin-bottom: 6px; }
+.start-title { font-family: var(--font-title); font-size: 1.6rem; text-align: center; margin-bottom: 2px; line-height: 1.1; }
+.start-tagline { text-align: center; color: var(--subtext); font-size: 0.8rem; font-weight: 700; margin-bottom: 18px; }
+.name-input {
+  width: 100%; padding: 12px 16px; border-radius: 14px;
+  border: 2px solid var(--choice-border); background: var(--choice-bg);
+  color: var(--text); font-family: var(--font-body); font-size: 1rem; font-weight: 700;
+  margin-bottom: 14px; outline: none; transition: border-color 0.2s;
+}
+.name-input:focus { border-color: var(--accent); }
+.start-section-label { font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--subtext); margin-bottom: 7px; }
+.start-themes { display: flex; gap: 8px; margin-bottom: 14px; }
+.start-theme-btn {
+  flex: 1; padding: 10px 6px; border-radius: 14px; border: 2px solid var(--choice-border);
+  background: var(--choice-bg); color: var(--text); font-family: var(--font-body);
+  font-weight: 800; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.start-theme-btn .big { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+.start-theme-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
+.start-ctrl-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.start-ctrl-btn {
+  flex: 1; min-width: 80px; padding: 9px 8px; border-radius: 12px;
+  border: 2px solid var(--choice-border); background: var(--choice-bg);
+  color: var(--text); font-family: var(--font-body); font-weight: 800;
+  font-size: 0.78rem; cursor: pointer; transition: all 0.2s; text-align: center; line-height: 1.3;
+}
+.start-ctrl-btn span { display: block; font-size: 0.65rem; color: var(--subtext); font-weight: 700; margin-top: 2px; }
+.start-ctrl-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
+.start-ctrl-btn.active span { color: rgba(255,255,255,0.8); }
+.start-btn {
+  width: 100%; padding: 15px; border-radius: 16px; border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white; font-family: var(--font-title); font-size: 1.2rem;
+  cursor: pointer; margin-top: 6px;
+  box-shadow: 0 4px 20px var(--btn-shadow);
+  transition: all 0.2s;
+}
+.start-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+/* MAIN APP */
+.app {
+  position: relative; z-index: 1; max-width: 480px; margin: 0 auto;
+  padding: 12px 14px 24px; display: flex; flex-direction: column; gap: 10px;
+  min-height: 100vh;
+}
+.theme-bar { display: flex; gap: 6px; justify-content: center; }
+.theme-btn {
+  padding: 6px 12px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--card); color: var(--subtext); font-family: var(--font-body);
+  font-weight: 800; font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+}
+.theme-btn .t-icon { font-size: 1rem; }
+.theme-btn.active { border-color: var(--accent); color: var(--accent); }
+
+.hud {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 18px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+}
+.hud-info { flex: 1; }
+.hud-title { font-family: var(--font-title); font-size: 1rem; line-height: 1.1; }
+.hud-subtitle { font-size: 0.7rem; color: var(--subtext); font-weight: 700; }
+.lives-display { font-size: 1.2rem; letter-spacing: 2px; }
+.score-pill {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  font-weight: 900; font-size: 0.85rem;
+}
+
+.story-banner {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 12px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.story-scene { font-size: 2rem; flex-shrink: 0; }
+.story-text { font-size: 0.85rem; font-weight: 700; line-height: 1.4; }
+.story-sub { font-size: 0.72rem; color: var(--subtext); font-weight: 600; margin-top: 2px; }
+
+.level-track { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 10px 14px; }
+.level-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.78rem; font-weight: 800; }
+.level-dots { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+.dot {
+  width: 18px; height: 10px; border-radius: 5px;
+  background: var(--choice-border); transition: background 0.3s, transform 0.2s;
+}
+.dot.filled { background: var(--progress-fill); }
+.dot.just-filled { transform: scaleY(1.4); }
+.correct-counter { font-size: 0.72rem; color: var(--subtext); font-weight: 700; }
+
+.q-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 20px 16px; text-align: center;
+}
+.q-flavor { font-size: 0.8rem; color: var(--subtext); font-weight: 700; margin-bottom: 6px; }
+.q-number { font-family: var(--font-title); font-size: 2.8rem; margin-bottom: 6px; line-height: 1; }
+.q-story { font-size: 0.75rem; color: var(--subtext); font-weight: 600; }
+
+.choices {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.choice {
+  padding: 18px 8px; border-radius: 16px;
+  border: 2px solid var(--choice-border); background: var(--choice-bg);
+  color: var(--text); font-family: var(--font-title); font-size: 2rem;
+  cursor: pointer; transition: all 0.16s cubic-bezier(.4,0,.2,1);
+  position: relative; overflow: hidden;
+}
+.choice:hover:not(:disabled) { border-color: var(--accent); background: var(--choice-hover); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.choice:disabled { cursor: not-allowed; }
+.choice:focus { outline: none; }
+.choice:focus-visible { outline: 2px solid var(--accent); }
+.no-transition { transition: none !important; box-shadow: none !important; transform: none !important; background: var(--choice-bg) !important; border-color: var(--choice-border) !important; }
+.choice.correct { background: var(--correct) !important; border-color: var(--correct) !important; color: white; transform: scale(1.05) !important; box-shadow: 0 0 28px rgba(0,200,150,0.5) !important; }
+.choice.wrong { background: var(--wrong) !important; border-color: var(--wrong) !important; color: white !important; animation: shake 0.38s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+
+.feedback { border-radius: 12px; padding: 8px 14px; font-size: 0.85rem; font-weight: 800; text-align: center; min-height: 36px; transition: all 0.2s; }
+.feedback.ok { background: rgba(0,200,150,0.12); color: var(--correct); }
+.feedback.bad { background: rgba(232,72,85,0.12); color: var(--wrong); }
+.streak { text-align: center; font-size: 0.85rem; font-weight: 800; min-height: 24px; color: var(--accent2); }
+
+/* OVERLAYS */
+.overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.overlay.show { opacity: 1; pointer-events: all; }
+.overlay-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px; padding: 28px 24px; width: 100%; max-width: 380px;
+  text-align: center; box-shadow: 0 32px 80px rgba(0,0,0,0.7);
+}
+.ov-emoji { font-size: 4rem; margin-bottom: 10px; display: block; }
+.ov-title { font-family: var(--font-title); font-size: 1.8rem; margin-bottom: 8px; }
+.ov-story { font-size: 0.85rem; color: var(--subtext); margin-bottom: 14px; line-height: 1.5; font-weight: 600; }
+.ov-meta { display: flex; gap: 12px; justify-content: center; margin-bottom: 16px; }
+.ov-stat { background: var(--card2); border-radius: 12px; padding: 10px 20px; }
+.ov-stat-val { font-family: var(--font-title); font-size: 2rem; }
+.ov-stat-label { font-size: 0.68rem; color: var(--subtext); font-weight: 700; text-transform: uppercase; }
+.stars-row { font-size: 2rem; margin-bottom: 12px; }
+.ov-btn {
+  width: 100%; padding: 13px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white; font-family: var(--font-title); font-size: 1.1rem;
+  cursor: pointer; margin-bottom: 8px; transition: all 0.2s;
+  box-shadow: 0 4px 16px var(--btn-shadow);
+}
+.ov-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.ov-btn.secondary { background: var(--card2); color: var(--subtext); box-shadow: none; font-size: 0.9rem; }
+
+/* Ctrl bar */
+.ctrl-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+.ctrl-btn {
+  flex: 1; min-width: 70px; padding: 7px 10px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--card); color: var(--subtext);
+  font-family: var(--font-body); font-weight: 800; font-size: 0.72rem; cursor: pointer; transition: all 0.2s;
+}
+.ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+
+/* Progress bar */
+.level-progress-bar { height: 6px; background: var(--choice-border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.level-progress-fill { height: 100%; background: var(--progress-fill); border-radius: 3px; transition: width 0.3s ease; }
+</style>
+</head>
+<body class="theme-jungle">
+<div class="bg-layer"></div>
+<div class="life-lost-flash" id="lifeLostFlash"></div>
+<div class="correct-flash" id="correctFlash"></div>
+
+<!-- START SCREEN -->
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <div class="start-logo" id="startLogo">🦁</div>
+    <div class="start-title">Accuflip Math Adventure</div>
+    <div class="start-tagline">Multiplication &amp; Division · 10 levels · 3 lives</div>
+    <input class="name-input" id="nameInput" type="text" placeholder="What's your name?" maxlength="20" />
+    <div class="start-themes">
+      <button class="start-theme-btn active" onclick="selectStartTheme('jungle')" id="stbtn-jungle"><span class="big">🦁</span>Jungle</button>
+      <button class="start-theme-btn" onclick="selectStartTheme('ocean')" id="stbtn-ocean"><span class="big">🐬</span>Ocean</button>
+      <button class="start-theme-btn" onclick="selectStartTheme('space')" id="stbtn-space"><span class="big">🚀</span>Space</button>
+    </div>
+    <div class="start-section-label">Difficulty</div>
+    <div class="start-ctrl-row">
+      <button class="start-ctrl-btn active" onclick="selectStartDiff('easy')" id="sdbtn-easy">🟢 Easy<span>×2 to ×5</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartDiff('medium')" id="sdbtn-medium">🟡 Medium<span>×2 to ×10</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartDiff('hard')" id="sdbtn-hard">🔴 Hard<span>×2 to ×12</span></button>
+    </div>
+    <div class="start-section-label">Operation</div>
+    <div class="start-ctrl-row">
+      <button class="start-ctrl-btn active" onclick="selectStartOp('both')" id="sobtn-both">✖️➗ Both</button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('mult')" id="sobtn-mult">✖️ Multiply</button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('div')" id="sobtn-div">➗ Divide</button>
+    </div>
+    <button class="start-btn" onclick="beginGame()">🎮 Start Adventure!</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="mainApp" style="display:none">
+  <div class="theme-bar">
+    <button class="theme-btn active" onclick="setTheme('jungle')" id="tbtn-jungle"><span class="t-icon">🦁</span> Jungle</button>
+    <button class="theme-btn" onclick="setTheme('ocean')" id="tbtn-ocean"><span class="t-icon">🐬</span> Ocean</button>
+    <button class="theme-btn" onclick="setTheme('space')" id="tbtn-space"><span class="t-icon">🚀</span> Space</button>
+  </div>
+  <div class="hud">
+    <div class="hud-info">
+      <div class="hud-title" id="hudTitle">Jungle Adventure</div>
+      <div class="hud-subtitle" id="hudSubtitle">Level 1 of 10</div>
+    </div>
+    <div class="lives-display" id="livesDisplay">❤️❤️❤️</div>
+    <div class="score-pill">⭐ <span id="scoreDisplay">0</span></div>
+  </div>
+  <div class="story-banner">
+    <div class="story-scene" id="storyScene">🌿</div>
+    <div>
+      <div class="story-text" id="storyText">Loading your adventure...</div>
+      <div class="story-sub" id="storySub"></div>
+    </div>
+  </div>
+  <div class="level-track">
+    <div class="level-header">
+      <div class="level-label" id="levelLabel">Level 1</div>
+      <div class="level-count" id="levelCount">0 / 10 correct</div>
+    </div>
+    <div class="level-dots" id="levelDots"></div>
+    <div class="correct-counter">Get <span id="remainingCount">10</span> more correct to advance!</div>
+  </div>
+  <div class="q-card">
+    <div class="q-flavor" id="qFlavor">What is...</div>
+    <div class="q-number" id="qNumber">? × ?</div>
+    <div class="q-story" id="qStory"></div>
+  </div>
+  <div class="choices" id="choicesGrid"></div>
+  <div class="feedback" id="feedbackBar"></div>
+  <div class="streak" id="streakBar"></div>
+</div>
+
+<!-- LEVEL COMPLETE -->
+<div class="overlay" id="levelOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="lvlEmoji">🎉</span>
+    <div class="ov-title" id="lvlTitle">Level Complete!</div>
+    <div class="ov-story" id="lvlStory"></div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="lvlScore">0</div><div class="ov-stat-label">Total Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="lvlNum">1</div><div class="ov-stat-label">Level</div></div>
+    </div>
+    <button class="ov-btn" id="nextLevelBtn" onclick="advanceLevel()">Next Level →</button>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="goEmoji">💔</span>
+    <div class="ov-title">Game Over</div>
+    <div class="ov-story" id="goStory"></div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="goScore">0</div><div class="ov-stat-label">Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="goLevel">1</div><div class="ov-stat-label">Level Reached</div></div>
+    </div>
+    <button class="ov-btn" onclick="restartGame()">Try Again 🔄</button>
+    <button class="ov-btn secondary" onclick="goToStart()">Change Settings</button>
+  </div>
+</div>
+
+<!-- WIN -->
+<div class="overlay" id="winOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="winEmoji">🏆</span>
+    <div class="ov-title" id="winTitle">YOU WIN!</div>
+    <div class="ov-story" id="winStory"></div>
+    <div class="stars-row" id="winStars">⭐⭐⭐</div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="winScore">0</div><div class="ov-stat-label">Final Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="winLives">3</div><div class="ov-stat-label">Lives Left</div></div>
+    </div>
+    <button class="ov-btn" onclick="restartGame()">Play Again 🔄</button>
+    <button class="ov-btn secondary" onclick="goToStart()">New Adventure</button>
+  </div>
+</div>
+
+<script>
+const STORIES = {
+  jungle: {
+    icon: '🦁', title: 'Jungle Quest',
+    levels: [
+      {place:'Bamboo Grove',scene:'🎋'},{place:'Waterfall Pool',scene:'💦'},{place:'Monkey Canopy',scene:'🐒'},
+      {place:'Tiger Territory',scene:'🐯'},{place:'Elephant Crossing',scene:'🐘'},{place:'Parrot Perch',scene:'🦜'},
+      {place:'Cobra Cave',scene:'🐍'},{place:'Leopard Ledge',scene:'🐆'},{place:'Gorilla Ridge',scene:'🦍'},
+      {place:'Lion\'s Peak',scene:'🦁'},
+    ],
+    flavors: { mult:['Groups of...','Arrays of...','Sets of...','Packs of...'], div:['Split evenly...','Share between...','Divide into...','Groups from...'] },
+    correct:['Roar! 🦁','Wild! 🌿','Magnificent! 🐯','The jungle cheers! 🦜','Top of the food chain! 🐆'],
+    wrong:['Got lost in the jungle! 🌿','A monkey stole your answer! 🐒','Tangled in vines! ❌','The tiger disagrees! 🐯'],
+    win: name => `${name} conquered the jungle! 🦁 You are the apex predator of math!`,
+    gameOver: name => `${name} got lost deep in the jungle... The animals believe in you!`,
+  },
+  ocean: {
+    icon: '🐬', title: 'Ocean Deep',
+    levels: [
+      {place:'Coral Reef',scene:'🪸'},{place:'Kelp Forest',scene:'🌊'},{place:'Dolphin Cove',scene:'🐬'},
+      {place:'Shark Alley',scene:'🦈'},{place:'Sunken Ship',scene:'⚓'},{place:'Whale Song Bay',scene:'🐋'},
+      {place:'Anglerfish Abyss',scene:'🐟'},{place:'Octopus Garden',scene:'🐙'},{place:'Manta Ray Ridge',scene:'🌊'},
+      {place:'Mariana Deep',scene:'🌊'},
+    ],
+    flavors: { mult:['Pods of...','Schools of...','Clusters of...','Shoals of...'], div:['Split the catch...','Divide the reef...','Share among...','Portion out...'] },
+    correct:['Splash! 🐬','Fin-tastic! 🦈','Ocean approved! 🌊','The dolphins cheer! 🐬','Deep sea correct! 🐙'],
+    wrong:['Got swept by a current! 🌊','A shark circled that answer! 🦈','Tangled in seaweed! ❌','Lost in the abyss! 🌑'],
+    win: name => `${name} reached the deepest trench! 🏆 You rule the seven seas!`,
+    gameOver: name => `${name} got swept to shore... Dive back in!`,
+  },
+  space: {
+    icon: '🚀', title: 'Galactic Quest',
+    levels: [
+      {place:'Launch Pad',scene:'🛸'},{place:'Moon Base',scene:'🌙'},{place:'Mars Colony',scene:'🔴'},
+      {place:'Asteroid Belt',scene:'☄️'},{place:'Jupiter Station',scene:'🪐'},{place:'Saturn Rings',scene:'💫'},
+      {place:'Uranus Orbit',scene:'🌀'},{place:'Neptune Deep',scene:'🌊'},{place:'Pluto Outpost',scene:'❄️'},
+      {place:'Star Cluster Omega',scene:'⭐'},
+    ],
+    flavors: { mult:['Galaxies of...','Arrays across...','Constellations of...','Orbits of...'], div:['Split the crew...','Divide resources...','Ration supplies...','Partition sectors...'] },
+    correct:['Warp speed! 🚀','Stellar! ⭐','Mission success! ✅','Houston approves! 📡','Galactic! 🌌'],
+    wrong:['Lost in hyperspace! 🌌','Mission control says no! 📡','Meteor shower! ☄️','Signal lost! 📡'],
+    win: name => `${name} reached Star Cluster Omega! 🏆 Math champion of the galaxy!`,
+    gameOver: name => `${name}'s ship needs repair... Refuel and try again!`,
+  },
+};
+
+const TOTAL_LEVELS = 10;
+const CORRECT_TO_ADVANCE = 10;
+const MAX_LIVES = 3;
+
+let state = { level:1, lives:MAX_LIVES, score:0, correctThisLevel:0, streak:0, theme:'jungle', diff:'easy', op:'both', playerName:'Explorer', currentAnswer:0, answered:false };
+
+let startTheme = 'jungle';
+let startDiff = 'easy';
+let startOp = 'both';
+
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function getTimesRange() {
+  if (state.diff === 'easy') return [2, 5];
+  if (state.diff === 'medium') return [2, 10];
+  return [2, 12];
+}
+
+function genQuestion() {
+  const [lo, hi] = getTimesRange();
+  const a = rand(lo, hi);
+  const b = rand(lo, hi);
+  const useDiv = state.op === 'div' || (state.op === 'both' && Math.random() < 0.45);
+
+  if (useDiv) {
+    const product = a * b;
+    return { answer: b, display: `${product} ÷ ${a}`, op: '÷' };
+  } else {
+    return { answer: a * b, display: `${a} × ${b}`, op: '×' };
+  }
+}
+
+function genChoices(answer) {
+  const pool = new Set([answer]);
+  const spread = state.diff === 'easy' ? 5 : state.diff === 'medium' ? 12 : 20;
+  const candidates = [answer+1,answer-1,answer+2,answer-2,answer+rand(2,spread),answer-rand(2,spread),answer+rand(spread+1,spread*2)];
+  for (const c of candidates) { if (pool.size >= 4) break; if (c > 0 && c !== answer && !pool.has(c)) pool.add(c); }
+  let fill = answer + rand(3, spread+5);
+  while (pool.size < 4) { if (!pool.has(fill) && fill > 0) pool.add(fill); fill++; }
+  return [...pool].sort(() => Math.random() - 0.5);
+}
+
+function selectStartTheme(t) {
+  startTheme = t;
+  document.body.className = 'theme-' + t;
+  document.querySelectorAll('.start-theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('stbtn-' + t).classList.add('active');
+  document.getElementById('startLogo').textContent = STORIES[t].icon;
+}
+function selectStartDiff(d) {
+  startDiff = d;
+  document.querySelectorAll('[id^=sdbtn-]').forEach(b => b.classList.remove('active'));
+  document.getElementById('sdbtn-' + d).classList.add('active');
+}
+function selectStartOp(o) {
+  startOp = o;
+  document.querySelectorAll('[id^=sobtn-]').forEach(b => b.classList.remove('active'));
+  document.getElementById('sobtn-' + o).classList.add('active');
+}
+
+function beginGame() {
+  state.playerName = document.getElementById('nameInput').value.trim() || 'Explorer';
+  state.theme = startTheme; state.diff = startDiff; state.op = startOp;
+  document.body.className = 'theme-' + state.theme;
+  document.getElementById('startScreen').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    initGame();
+  }, 400);
+}
+
+function setTheme(t) {
+  state.theme = t;
+  document.body.className = 'theme-' + t;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tbtn-' + t).classList.add('active');
+  updateStoryBanner(); updateHUD();
+}
+
+function initGame() {
+  state.level = 1; state.lives = MAX_LIVES; state.score = 0; state.correctThisLevel = 0; state.streak = 0;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tbtn-' + state.theme).classList.add('active');
+  updateLives(); updateHUD(); updateStoryBanner(); buildDots(); loadQuestion();
+}
+
+function updateHUD() {
+  const s = STORIES[state.theme];
+  document.getElementById('hudTitle').textContent = s.title;
+  document.getElementById('hudSubtitle').textContent = `Level ${state.level} of ${TOTAL_LEVELS}`;
+  document.getElementById('levelLabel').textContent = `Level ${state.level}`;
+  const rem = CORRECT_TO_ADVANCE - state.correctThisLevel;
+  document.getElementById('levelCount').textContent = `${state.correctThisLevel} / ${CORRECT_TO_ADVANCE} correct`;
+  document.getElementById('remainingCount').textContent = rem;
+  document.getElementById('scoreDisplay').textContent = state.score;
+}
+
+function updateLives() {
+  document.getElementById('livesDisplay').textContent = '❤️'.repeat(state.lives) + '🖤'.repeat(MAX_LIVES - state.lives);
+}
+
+function updateStoryBanner() {
+  const s = STORIES[state.theme];
+  const lvl = s.levels[state.level - 1];
+  document.getElementById('storyScene').textContent = lvl.scene;
+  document.getElementById('storyText').textContent = `${state.playerName} arrives at ${lvl.place}`;
+  document.getElementById('storySub').textContent = s.title;
+}
+
+function buildDots() {
+  const container = document.getElementById('levelDots');
+  container.innerHTML = '';
+  for (let i = 0; i < CORRECT_TO_ADVANCE; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < state.correctThisLevel ? ' filled' : '');
+    container.appendChild(d);
+  }
+}
+function updateDots() {
+  const dots = document.querySelectorAll('.dot');
+  const idx = state.correctThisLevel - 1;
+  if (dots[idx]) { dots[idx].classList.add('filled', 'just-filled'); setTimeout(() => dots[idx].classList.remove('just-filled'), 300); }
+  updateHUD();
+}
+
+function loadQuestion() {
+  state.answered = false;
+  const q = genQuestion();
+  state.currentAnswer = q.answer;
+  const s = STORIES[state.theme];
+  const flavArr = q.op === '×' ? s.flavors.mult : s.flavors.div;
+  document.getElementById('qFlavor').textContent = flavArr[rand(0, flavArr.length - 1)];
+  document.getElementById('qNumber').textContent = q.display;
+  document.getElementById('qStory').textContent = `${s.levels[state.level-1].place} — What's the answer?`;
+
+  const oldGrid = document.getElementById('choicesGrid');
+  const newGrid = document.createElement('div');
+  newGrid.className = oldGrid.className; newGrid.id = 'choicesGrid';
+  oldGrid.parentNode.replaceChild(newGrid, oldGrid);
+
+  const choices = genChoices(q.answer);
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice no-transition';
+    btn.textContent = c;
+    btn.onclick = () => handleAnswer(btn, c);
+    newGrid.appendChild(btn);
+  });
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    newGrid.querySelectorAll('.choice').forEach(b => b.classList.remove('no-transition'));
+  }));
+
+  document.getElementById('feedbackBar').className = 'feedback';
+  document.getElementById('feedbackBar').textContent = '';
+  updateStreak();
+}
+
+function handleAnswer(btn, chosen) {
+  if (state.answered) return;
+  state.answered = true;
+  btn.blur();
+  const correct = chosen === state.currentAnswer;
+  const s = STORIES[state.theme];
+  const fb = document.getElementById('feedbackBar');
+
+  document.querySelectorAll('.choice').forEach(b => {
+    b.disabled = true;
+    if (parseInt(b.textContent) === state.currentAnswer) b.classList.add('correct');
+  });
+
+  if (correct) {
+    btn.classList.add('correct');
+    state.score++; state.correctThisLevel++; state.streak++;
+    document.getElementById('scoreDisplay').textContent = state.score;
+    fb.className = 'feedback ok';
+    fb.textContent = s.correct[rand(0, s.correct.length - 1)];
+    const cf = document.getElementById('correctFlash');
+    cf.classList.remove('flash'); void cf.offsetWidth; cf.classList.add('flash');
+    updateDots(); updateHUD(); updateStreak();
+    if (state.correctThisLevel >= CORRECT_TO_ADVANCE) {
+      playLevelUp(); setTimeout(() => showLevelComplete(), 700);
+    } else { playCorrect(); setTimeout(() => loadQuestion(), 900); }
+  } else {
+    btn.classList.add('wrong');
+    state.streak = 0; state.lives--;
+    fb.className = 'feedback bad';
+    fb.textContent = s.wrong[rand(0, s.wrong.length - 1)] + ` (Answer: ${state.currentAnswer})`;
+    const lf = document.getElementById('lifeLostFlash');
+    lf.classList.remove('flash'); void lf.offsetWidth; lf.classList.add('flash');
+    updateLives(); updateStreak();
+    if (state.lives <= 0) { playGameOver(); setTimeout(() => showGameOver(), 900); }
+    else { playLifeLost(); setTimeout(() => loadQuestion(), 1000); }
+  }
+}
+
+function updateStreak() {
+  const sb = document.getElementById('streakBar');
+  if (state.streak >= 3) { sb.textContent = `🔥 ${state.streak} in a row!`; }
+  else { sb.textContent = ''; }
+}
+
+function showLevelComplete() {
+  const s = STORIES[state.theme];
+  document.getElementById('lvlEmoji').textContent = s.icon;
+  document.getElementById('lvlTitle').textContent = state.level >= TOTAL_LEVELS ? '🏆 All Levels Done!' : `Level ${state.level} Complete!`;
+  document.getElementById('lvlStory').textContent = s.levels[state.level - 1]?.place + ' conquered!';
+  document.getElementById('lvlScore').textContent = state.score;
+  document.getElementById('lvlNum').textContent = state.level;
+  document.getElementById('nextLevelBtn').textContent = state.level >= TOTAL_LEVELS ? '🏆 Claim Victory!' : 'Next Level →';
+  document.getElementById('levelOverlay').classList.add('show');
+}
+
+function advanceLevel() {
+  document.getElementById('levelOverlay').classList.remove('show');
+  if (state.level >= TOTAL_LEVELS) { showWin(); return; }
+  state.level++; state.correctThisLevel = 0;
+  updateHUD(); updateStoryBanner(); buildDots(); loadQuestion();
+}
+
+function showGameOver() {
+  const s = STORIES[state.theme];
+  document.getElementById('goEmoji').textContent = s.icon;
+  document.getElementById('goStory').textContent = s.gameOver(state.playerName);
+  document.getElementById('goScore').textContent = state.score;
+  document.getElementById('goLevel').textContent = state.level;
+  document.getElementById('gameOverOverlay').classList.add('show');
+}
+
+function showWin() {
+  playWin();
+  const stars = state.lives === 3 ? '⭐⭐⭐' : state.lives === 2 ? '⭐⭐☆' : '⭐☆☆';
+  const s = STORIES[state.theme];
+  document.getElementById('winEmoji').textContent = '🏆';
+  document.getElementById('winTitle').textContent = `${state.playerName} Wins!`;
+  document.getElementById('winStory').textContent = s.win(state.playerName);
+  document.getElementById('winStars').textContent = stars;
+  document.getElementById('winScore').textContent = state.score;
+  document.getElementById('winLives').textContent = state.lives;
+  document.getElementById('winOverlay').classList.add('show');
+}
+
+function restartGame() {
+  hideAllOverlays(); initGame();
+}
+function goToStart() {
+  hideAllOverlays();
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+  document.getElementById('startScreen').classList.remove('hidden');
+  document.body.className = 'theme-' + state.theme;
+}
+function hideAllOverlays() {
+  ['levelOverlay','gameOverOverlay','winOverlay'].forEach(id => document.getElementById(id).classList.remove('show'));
+}
+
+// AUDIO ENGINE
+let audioCtx = null;
+function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function chipNote(freq, startTime, duration, type='square', vol=0.18, ctx) {
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = type; osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(vol, startTime); gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.start(startTime); osc.stop(startTime + duration);
+}
+function playCorrect() { try { const ctx = getAudio(); const t = ctx.currentTime; [261,329,392].forEach((f,i) => chipNote(f,t+i*0.08,0.15,'square',0.15,ctx)); } catch(e){} }
+function playLifeLost() { try { const ctx = getAudio(); const t = ctx.currentTime; [330,277,220,185].forEach((f,i) => chipNote(f,t+i*0.1,0.18,'sawtooth',0.14,ctx)); } catch(e){} }
+function playGameOver() { try { const ctx = getAudio(); const t = ctx.currentTime; [220,196,175,165].forEach((f,i) => chipNote(f,t+i*0.18,0.3,'sawtooth',0.16,ctx)); } catch(e){} }
+function playLevelUp() {
+  try {
+    const ctx = getAudio(); const t = ctx.currentTime;
+    [330,392,494,659].forEach((f,i) => chipNote(f,t+i*0.1,0.2,'square',0.16,ctx));
+    chipNote(659,t+0.5,0.4,'square',0.18,ctx); chipNote(784,t+0.55,0.4,'square',0.1,ctx); chipNote(988,t+0.6,0.4,'square',0.06,ctx);
+  } catch(e){}
+}
+function playWin() {
+  try {
+    const ctx = getAudio(); const t = ctx.currentTime;
+    [261,294,329,349,392,440,494,523,659].forEach((f,i) => chipNote(f,t+i*0.1,0.2,'square',0.16,ctx));
+    setTimeout(() => { const t2 = ctx.currentTime; chipNote(523,t2,0.5,'square',0.2,ctx); chipNote(659,t2+0.05,0.5,'square',0.12,ctx); chipNote(784,t2+0.1,0.5,'square',0.08,ctx); }, 1000);
+  } catch(e){}
+}
+</script>
+</body>
+</html>

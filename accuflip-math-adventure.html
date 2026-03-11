@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accuflip Math Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   CSS VARIABLES — switched per theme
+═══════════════════════════════════════════ */
+:root {
+  --bg: #0e1623;
+  --bg2: #131f30;
+  --card: #1a2a40;
+  --card2: #1e3050;
+  --accent: #e84855;
+  --accent2: #f5a623;
+  --text: #f0f4ff;
+  --subtext: #7a90b0;
+  --border: rgba(255,255,255,0.08);
+  --correct: #00c896;
+  --wrong: #e84855;
+  --life: #e84855;
+  --progress-fill: #e84855;
+  --btn-shadow: rgba(232,72,85,0.4);
+  --choice-bg: #1a2f50;
+  --choice-border: #243d60;
+  --choice-hover: #1e3a68;
+  --font-title: 'Fredoka One', cursive;
+  --font-body: 'Nunito', sans-serif;
+}
+
+body.theme-princess {
+  --bg: #1a0826;
+  --bg2: #220d30;
+  --card: #2d1040;
+  --card2: #381550;
+  --accent: #e040a0;
+  --accent2: #ffb3da;
+  --text: #fff0fa;
+  --subtext: #c080b0;
+  --border: rgba(255,150,220,0.12);
+  --correct: #40d090;
+  --wrong: #ff4d7a;
+  --life: #ff6090;
+  --progress-fill: #e040a0;
+  --btn-shadow: rgba(224,64,160,0.5);
+  --choice-bg: #2d1040;
+  --choice-border: #501870;
+  --choice-hover: #3d1560;
+}
+
+body.theme-space {
+  --bg: #04040f;
+  --bg2: #07071a;
+  --card: #0d0d2b;
+  --card2: #10103a;
+  --accent: #6c63ff;
+  --accent2: #00e5ff;
+  --text: #e8e8ff;
+  --subtext: #6060a0;
+  --border: rgba(108,99,255,0.15);
+  --correct: #00e5ff;
+  --wrong: #ff4d6d;
+  --life: #ff4d6d;
+  --progress-fill: #6c63ff;
+  --btn-shadow: rgba(108,99,255,0.5);
+  --choice-bg: #0d0d2b;
+  --choice-border: #1a1a50;
+  --choice-hover: #18185a;
+}
+
+/* ═══════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.5s, color 0.5s;
+  overflow-x: hidden;
+}
+
+/* Animated background layers */
+.bg-layer {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+}
+
+/* Train bg */
+body.theme-train .bg-layer {
+  background:
+    linear-gradient(180deg, #0e1623 0%, #131f30 100%);
+}
+body.theme-train .bg-layer::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg,
+    #2a3a50 0px, #2a3a50 40px,
+    transparent 40px, transparent 60px,
+    #2a3a50 60px, #2a3a50 100px
+  );
+  opacity: 0.4;
+}
+
+/* Princess bg */
+body.theme-princess .bg-layer {
+  background: radial-gradient(ellipse at 15% 15%, rgba(224,64,160,0.15) 0%, transparent 45%),
+              radial-gradient(ellipse at 85% 85%, rgba(155,60,200,0.12) 0%, transparent 45%),
+              linear-gradient(180deg, #1a0826, #220d30);
+}
+
+/* Space bg — stars */
+body.theme-space .bg-layer {
+  background: #04040f;
+  background-image:
+    radial-gradient(1px 1px at 5% 10%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 15% 30%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 25% 5%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 35% 20%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 45% 40%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 55% 8%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 65% 28%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 85% 35%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 95% 12%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 30% 75%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 50% 65%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.3), transparent),
+    radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 20% 50%, rgba(108,99,255,0.6), transparent),
+    radial-gradient(2px 2px at 60% 55%, rgba(0,229,255,0.4), transparent),
+    radial-gradient(2px 2px at 80% 45%, rgba(255,100,150,0.4), transparent);
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.app {
+  position: relative; z-index: 1;
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 12px 14px 30px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ═══════════════════════════════════════════
+   THEME BAR
+═══════════════════════════════════════════ */
+.theme-bar {
+  display: flex;
+  gap: 8px;
+}
+.theme-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--subtext);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  gap: 5px;
+}
+.theme-btn .t-icon { font-size: 1.1rem; }
+.theme-btn:hover { color: var(--text); border-color: var(--accent); }
+.theme-btn.active {
+  border-color: var(--accent);
+  background: var(--card2);
+  color: var(--text);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.05), 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* ═══════════════════════════════════════════
+   TOP HUD
+═══════════════════════════════════════════ */
+.hud {
+  background: var(--card);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.hud-left { display: flex; flex-direction: column; }
+.hud-title {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.hud-subtitle {
+  font-size: 0.72rem;
+  color: var(--subtext);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.hud-right { display: flex; align-items: center; gap: 12px; }
+
+.lives-display { display: flex; gap: 4px; font-size: 1.3rem; }
+
+.score-pill {
+  background: var(--accent);
+  color: white;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  padding: 4px 14px;
+  border-radius: 30px;
+  box-shadow: 0 2px 10px var(--btn-shadow);
+}
+
+/* ═══════════════════════════════════════════
+   STORY BANNER
+═══════════════════════════════════════════ */
+.story-banner {
+  background: var(--card2);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.story-scene { font-size: 2.2rem; flex-shrink: 0; }
+.story-text { font-size: 0.88rem; color: var(--text); line-height: 1.45; font-weight: 700; }
+.story-sub { font-size: 0.78rem; color: var(--subtext); margin-top: 2px; font-weight: 600; }
+
+/* ═══════════════════════════════════════════
+   LEVEL PROGRESS
+═══════════════════════════════════════════ */
+.level-track {
+  background: var(--card);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+}
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.level-label {
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  color: var(--subtext);
+}
+.level-count {
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  color: var(--accent2);
+}
+.level-dots {
+  display: flex;
+  gap: 4px;
+}
+.level-dot {
+  height: 8px;
+  flex: 1;
+  border-radius: 30px;
+  background: var(--choice-border);
+  transition: all 0.35s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.level-dot.filled {
+  background: var(--correct);
+  box-shadow: 0 0 6px var(--correct);
+}
+.level-dot.current {
+  background: var(--choice-border);
+}
+.level-dot.current::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  border-radius: 30px;
+  transform-origin: left;
+  transform: scaleX(var(--fill, 0));
+  transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.correct-counter {
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  color: var(--subtext);
+  margin-top: 6px;
+}
+.correct-counter span { color: var(--accent); }
+
+/* ═══════════════════════════════════════════
+   DIFF + OP
+═══════════════════════════════════════════ */
+.controls-row {
+  display: flex;
+  gap: 8px;
+}
+.ctrl-group {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+.ctrl-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 10px;
+  border: 2px solid var(--choice-border);
+  background: var(--choice-bg);
+  color: var(--subtext);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+.ctrl-btn:hover { color: var(--text); border-color: var(--accent); }
+.ctrl-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+/* ═══════════════════════════════════════════
+   QUESTION CARD
+═══════════════════════════════════════════ */
+.q-card {
+  background: var(--card);
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  padding: 28px 24px 24px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+}
+
+.q-card::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 140px; height: 140px;
+  background: var(--accent);
+  opacity: 0.04;
+  border-radius: 50%;
+}
+.q-card::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 100px; height: 100px;
+  background: var(--accent2);
+  opacity: 0.04;
+  border-radius: 50%;
+}
+
+.q-flavor {
+  font-size: 0.82rem;
+  color: var(--subtext);
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.q-number {
+  font-family: var(--font-title);
+  font-size: clamp(3.2rem, 13vw, 5.8rem);
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: 3px;
+}
+
+body.theme-space .q-number {
+  text-shadow: 0 0 30px var(--accent), 0 0 60px rgba(108,99,255,0.3);
+}
+body.theme-princess .q-number {
+  text-shadow: 0 0 20px rgba(224,64,160,0.4);
+}
+
+.q-story {
+  font-size: 0.85rem;
+  color: var(--subtext);
+  font-style: italic;
+  min-height: 1.3em;
+}
+
+/* ═══════════════════════════════════════════
+   CHOICES
+═══════════════════════════════════════════ */
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.choice {
+  background: var(--choice-bg);
+  border: 2px solid var(--choice-border);
+  border-radius: 16px;
+  padding: 16px 10px;
+  color: var(--text);
+  font-family: var(--font-title);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.16s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.choice::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.choice:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--choice-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+}
+.choice:disabled { cursor: not-allowed; }
+
+.choice.correct {
+  background: var(--correct) !important;
+  border-color: var(--correct) !important;
+  color: white;
+  transform: scale(1.05) !important;
+  box-shadow: 0 0 28px rgba(0,200,150,0.5) !important;
+}
+.choice.wrong {
+  background: var(--wrong) !important;
+  border-color: var(--wrong) !important;
+  color: white !important;
+  animation: shake 0.38s ease;
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ═══════════════════════════════════════════
+   FEEDBACK
+═══════════════════════════════════════════ */
+.feedback {
+  min-height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  transition: all 0.25s;
+  padding: 6px 12px;
+  text-align: center;
+}
+.feedback.ok { background: rgba(0,200,150,0.12); color: var(--correct); }
+.feedback.bad { background: rgba(232,72,85,0.12); color: var(--wrong); }
+
+/* ═══════════════════════════════════════════
+   STREAK
+═══════════════════════════════════════════ */
+.streak {
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  color: var(--accent2);
+  min-height: 22px;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════
+   OVERLAY SCREENS
+═══════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s;
+  backdrop-filter: blur(6px);
+}
+.overlay.show { opacity: 1; pointer-events: all; }
+
+.overlay-card {
+  background: var(--card);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  padding: 36px 28px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  transform: scale(0.92);
+  transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+}
+.overlay.show .overlay-card { transform: scale(1); }
+
+.ov-emoji { font-size: 4rem; margin-bottom: 10px; display: block; }
+.ov-title {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+.ov-story {
+  font-size: 0.95rem;
+  color: var(--subtext);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.ov-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.ov-stat {
+  display: flex; flex-direction: column; align-items: center;
+}
+.ov-stat-val {
+  font-family: var(--font-title);
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+.ov-stat-label {
+  font-size: 0.72rem;
+  color: var(--subtext);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stars-row { font-size: 2.2rem; margin-bottom: 16px; }
+
+.ov-btn {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  border-radius: 14px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px var(--btn-shadow);
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+.ov-btn:hover { filter: brightness(1.12); transform: translateY(-2px); }
+.ov-btn.secondary {
+  background: var(--card2);
+  color: var(--subtext);
+  box-shadow: none;
+  font-size: 1rem;
+}
+.ov-btn.secondary:hover { color: var(--text); }
+
+/* Lives lost overlay pulse */
+.life-lost-flash {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--wrong);
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+.life-lost-flash.flash {
+  animation: flashRed 0.4s ease;
+}
+@keyframes flashRed {
+  0% { opacity: 0; }
+  30% { opacity: 0.25; }
+  100% { opacity: 0; }
+}
+
+/* Correct flash */
+.correct-flash {
+  position: fixed; inset: 0; z-index: 200;
+  background: var(--correct);
+  opacity: 0;
+  pointer-events: none;
+}
+.correct-flash.flash {
+  animation: flashGreen 0.3s ease;
+}
+@keyframes flashGreen {
+  0% { opacity: 0; }
+  30% { opacity: 0.1; }
+  100% { opacity: 0; }
+}
+
+/* Level up pulse ring */
+@keyframes popIn {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════
+   START SCREEN
+═══════════════════════════════════════════ */
+.start-screen {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  transition: opacity 0.4s;
+}
+.start-screen.hidden { opacity: 0; pointer-events: none; }
+
+.start-card {
+  background: var(--card);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  padding: 36px 28px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: popIn 0.4s ease;
+}
+
+.start-logo { font-size: 3.5rem; margin-bottom: 8px; }
+.start-title {
+  font-family: var(--font-title);
+  font-size: 2.2rem;
+  margin-bottom: 4px;
+}
+.start-tagline {
+  font-size: 0.9rem;
+  color: var(--subtext);
+  margin-bottom: 22px;
+  font-weight: 600;
+}
+
+.name-input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--choice-border);
+  background: var(--choice-bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.name-input:focus { border-color: var(--accent); }
+.name-input::placeholder { color: var(--subtext); }
+
+.start-themes {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.start-theme-btn {
+  flex: 1;
+  padding: 12px 6px;
+  border-radius: 14px;
+  border: 2px solid var(--choice-border);
+  background: var(--choice-bg);
+  color: var(--subtext);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+.start-theme-btn .big { font-size: 2rem; display: block; margin-bottom: 4px; }
+.start-theme-btn:hover { border-color: var(--accent); color: var(--text); }
+.start-theme-btn.active {
+  border-color: var(--accent);
+  background: var(--card2);
+  color: var(--text);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.04);
+}
+
+.start-section-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--subtext);
+  text-align: left;
+  margin: 10px 0 5px;
+}
+
+.start-ctrl-row {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+
+.start-ctrl-btn {
+  flex: 1;
+  padding: 9px 6px;
+  border-radius: 12px;
+  border: 2px solid var(--choice-border);
+  background: var(--choice-bg);
+  color: var(--subtext);
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.3;
+}
+.start-ctrl-btn span {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--subtext);
+  opacity: 0.8;
+}
+.start-ctrl-btn:hover { border-color: var(--accent); color: var(--text); }
+.start-ctrl-btn.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+.start-ctrl-btn.active span { color: rgba(255,255,255,0.8); }
+
+.start-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 6px 24px var(--btn-shadow);
+  letter-spacing: 0.5px;
+  margin-top: 12px;
+}
+.start-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+</style>
+</head>
+<body class="theme-train">
+
+<div class="bg-layer"></div>
+<div class="life-lost-flash" id="lifeLostFlash"></div>
+<div class="correct-flash" id="correctFlash"></div>
+
+<!-- ═══════ START SCREEN ═══════ -->
+<div class="start-screen" id="startScreen">
+  <div class="start-card">
+    <div class="start-logo" id="startLogo">🚂</div>
+    <div class="start-title">Accuflip Math Adventure</div>
+    <div class="start-tagline">10 levels · 3 lives · Addition &amp; Subtraction</div>
+
+    <input class="name-input" id="nameInput" type="text" placeholder="What's your name?" maxlength="20" />
+
+    <div class="start-themes">
+      <button class="start-theme-btn active" onclick="selectStartTheme('train')" id="stbtn-train">
+        <span class="big">🚂</span>Train
+      </button>
+      <button class="start-theme-btn" onclick="selectStartTheme('princess')" id="stbtn-princess">
+        <span class="big">👸</span>Princess
+      </button>
+      <button class="start-theme-btn" onclick="selectStartTheme('space')" id="stbtn-space">
+        <span class="big">🚀</span>Space
+      </button>
+    </div>
+
+    <div class="start-section-label">Difficulty</div>
+    <div class="start-ctrl-row">
+      <button class="start-ctrl-btn active" onclick="selectStartDiff('easy')" id="sdbtn-easy">🟢 Easy<span>Single digit</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartDiff('medium')" id="sdbtn-medium">🟡 Medium<span>Double digit</span></button>
+      <button class="start-ctrl-btn" onclick="selectStartDiff('hard')" id="sdbtn-hard">🔴 Hard<span>Carry &amp; borrow</span></button>
+    </div>
+
+    <div class="start-section-label">Operation</div>
+    <div class="start-ctrl-row">
+      <button class="start-ctrl-btn active" onclick="selectStartOp('both')" id="sobtn-both">➕➖ Both</button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('add')" id="sobtn-add">➕ Addition</button>
+      <button class="start-ctrl-btn" onclick="selectStartOp('sub')" id="sobtn-sub">➖ Subtraction</button>
+    </div>
+
+    <button class="start-btn" onclick="beginGame()">🎮 Start Adventure!</button>
+  </div>
+</div>
+
+<!-- ═══════ MAIN APP ═══════ -->
+<div class="app" id="mainApp" style="display:none">
+
+  <!-- Theme switcher -->
+  <div class="theme-bar">
+    <button class="theme-btn active" onclick="setTheme('train')" id="tbtn-train"><span class="t-icon">🚂</span> Train</button>
+    <button class="theme-btn" onclick="setTheme('princess')" id="tbtn-princess"><span class="t-icon">👸</span> Princess</button>
+    <button class="theme-btn" onclick="setTheme('space')" id="tbtn-space"><span class="t-icon">🚀</span> Space</button>
+  </div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-left">
+      <div class="hud-title" id="hudTitle">Train Adventure</div>
+      <div class="hud-subtitle" id="hudSubtitle">Station 1 of 10</div>
+    </div>
+    <div class="hud-right">
+      <div class="lives-display" id="livesDisplay">❤️❤️❤️</div>
+      <div class="score-pill">⭐ <span id="scoreDisplay">0</span></div>
+    </div>
+  </div>
+
+  <!-- Story banner -->
+  <div class="story-banner">
+    <div class="story-scene" id="storyScene">🚉</div>
+    <div>
+      <div class="story-text" id="storyText">Loading your adventure...</div>
+      <div class="story-sub" id="storySub"></div>
+    </div>
+  </div>
+
+  <!-- Level progress -->
+  <div class="level-track">
+    <div class="level-header">
+      <div class="level-label" id="levelLabel">Level 1</div>
+      <div class="level-count" id="levelCount">0 / 10 correct</div>
+    </div>
+    <div class="level-dots" id="levelDots"></div>
+    <div class="correct-counter">Get <span id="remainingCount">10</span> more correct to advance!</div>
+  </div>
+
+  <!-- Controls -->
+  <!-- Question -->
+  <div class="q-card">
+    <div class="q-flavor" id="qFlavor">What is...</div>
+    <div class="q-number" id="qNumber">? + ?</div>
+    <div class="q-story" id="qStory"></div>
+  </div>
+
+  <!-- Choices -->
+  <div class="choices" id="choicesGrid"></div>
+
+  <!-- Feedback + streak -->
+  <div class="feedback" id="feedbackBar"></div>
+  <div class="streak" id="streakBar"></div>
+
+</div>
+
+<!-- ═══════ LEVEL COMPLETE OVERLAY ═══════ -->
+<div class="overlay" id="levelOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="lvlEmoji">🎉</span>
+    <div class="ov-title" id="lvlTitle">Level Complete!</div>
+    <div class="ov-story" id="lvlStory"></div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="lvlScore">0</div><div class="ov-stat-label">Total Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="lvlNum">1</div><div class="ov-stat-label">Level</div></div>
+    </div>
+    <button class="ov-btn" id="nextLevelBtn" onclick="advanceLevel()">Next Level →</button>
+  </div>
+</div>
+
+<!-- ═══════ GAME OVER OVERLAY ═══════ -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="goEmoji">💔</span>
+    <div class="ov-title">Game Over</div>
+    <div class="ov-story" id="goStory"></div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="goScore">0</div><div class="ov-stat-label">Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="goLevel">1</div><div class="ov-stat-label">Level Reached</div></div>
+    </div>
+    <button class="ov-btn" onclick="restartGame()">Try Again 🔄</button>
+    <button class="ov-btn secondary" onclick="goToStart()">Change Settings</button>
+  </div>
+</div>
+
+<!-- ═══════ GAME WIN OVERLAY ═══════ -->
+<div class="overlay" id="winOverlay">
+  <div class="overlay-card">
+    <span class="ov-emoji" id="winEmoji">🏆</span>
+    <div class="ov-title" id="winTitle">YOU WIN!</div>
+    <div class="ov-story" id="winStory"></div>
+    <div class="stars-row" id="winStars">⭐⭐⭐</div>
+    <div class="ov-meta">
+      <div class="ov-stat"><div class="ov-stat-val" id="winScore">0</div><div class="ov-stat-label">Final Score</div></div>
+      <div class="ov-stat"><div class="ov-stat-val" id="winLives">3</div><div class="ov-stat-label">Lives Left</div></div>
+    </div>
+    <button class="ov-btn" onclick="restartGame()">Play Again 🔄</button>
+    <button class="ov-btn secondary" onclick="goToStart()">New Adventure</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STORY DATA
+// ═══════════════════════════════════════════
+const STORIES = {
+  train: {
+    title: 'Train Adventure',
+    icon: '🚂',
+    gameOver: (name) => `The train broke down, ${name}! Restock your coal and try again.`,
+    win: (name) => `${name} has completed the Grand Railway! You've traveled the entire line — a true engineer!`,
+    levels: [
+      { scene: '🚉', place: 'Union Station', text: (n) => `${n}'s train is at Union Station. Time to fire up the engine!`, sub: 'First stop on the grand railway tour' },
+      { scene: '🌆', place: 'Chicago', text: (n) => `Rolling into Chicago! The Windy City awaits, ${n}!`, sub: 'The tracks are clear — full steam ahead' },
+      { scene: '🌉', place: 'St. Louis', text: (n) => `Crossing the mighty Mississippi into St. Louis, ${n}!`, sub: 'The Gateway Arch gleams in the distance' },
+      { scene: '🌾', place: 'Kansas City', text: (n) => `Arriving at Kansas City! The jazz is playing, ${n}!`, sub: 'Halfway through the heartland' },
+      { scene: '🏔️', place: 'Denver', text: (n) => `The Rockies are ahead, ${n}! Chug up those mountains!`, sub: 'Mile High City — the climb begins' },
+      { scene: '🌵', place: 'Salt Lake City', text: (n) => `Zipping through the desert into Salt Lake City, ${n}!`, sub: 'The Great Salt Lake sparkles outside' },
+      { scene: '🌲', place: 'Portland', text: (n) => `Into the Pacific Northwest, ${n}! Rain and evergreens!`, sub: 'The trees tower over the tracks' },
+      { scene: '🌁', place: 'San Francisco', text: (n) => `Fog horns ahead! Welcome to San Francisco, ${n}!`, sub: 'The Golden Gate is almost in sight' },
+      { scene: '🎰', place: 'Las Vegas', text: (n) => `Lights everywhere, ${n}! Vegas never sleeps!`, sub: 'One more stop before the final destination' },
+      { scene: '🌴', place: 'Los Angeles', text: (n) => `Final stop — Los Angeles! Almost there, ${n}!`, sub: 'The end of the line is in sight!' },
+    ],
+    correct: ['Full steam ahead! 🚂', 'On track! ✅', 'Choo choo! 🎉', 'All aboard! 🚃', 'The conductor approves! 🎫'],
+    wrong: ['Derailed! ❌', 'Off the tracks! 🚂', 'Missed that station!', 'Wrong platform! ❌'],
+    flavors: {
+      add: ['Loading passengers...', 'Adding cargo cars!', 'Fueling up!', 'More coal aboard!', 'Picking up freight!'],
+      sub: ['Passengers got off...', 'Dropping cargo...', 'Using fuel...', 'Unloading at the stop...', 'Lost some coal...'],
+    }
+  },
+
+  princess: {
+    title: 'Princess Quest',
+    icon: '👸',
+    gameOver: (name) => `The spell broke, ${name}! The magical realm needs you to try again!`,
+    win: (name) => `${name} has reached the Enchanted Castle and broken the ancient spell! The kingdom is saved!`,
+    levels: [
+      { scene: '🌸', place: 'Petal Village', text: (n) => `${n} begins her quest in Petal Village, where flowers sing!`, sub: 'A gentle beginning to a magical journey' },
+      { scene: '🦋', place: 'Butterfly Meadow', text: (n) => `The butterflies guide ${n} through the shimmering meadow!`, sub: 'Colorful wings light the way forward' },
+      { scene: '🌊', place: 'Mermaid Cove', text: (n) => `${n} meets the mermaids who share secrets of the deep!`, sub: 'The tide is turning in your favor' },
+      { scene: '🍄', place: 'Mushroom Forest', text: (n) => `Glowing mushrooms light ${n}'s path through the dark forest!`, sub: 'Strange magic hums through the trees' },
+      { scene: '🏰', place: 'Crystal Caves', text: (n) => `${n} discovers the Crystal Caves, sparkling with rainbow light!`, sub: 'Diamonds and gems line every wall' },
+      { scene: '🐉', place: "Dragon's Pass", text: (n) => `${n} faces the friendly dragon guarding the mountain pass!`, sub: 'The dragon breathes harmless sparkles' },
+      { scene: '⭐', place: 'Star Bridge', text: (n) => `${n} walks across the magical Star Bridge in the sky!`, sub: 'Each step twinkles beneath your feet' },
+      { scene: '🌈', place: 'Rainbow Valley', text: (n) => `${n} slides down the Rainbow into the Valley of Wishes!`, sub: 'Every color grants a tiny wish' },
+      { scene: '🦄', place: 'Unicorn Fields', text: (n) => `The Unicorns bow to ${n} — almost at the castle!`, sub: 'Their manes shimmer with pure magic' },
+      { scene: '✨', place: 'Enchanted Castle', text: (n) => `${n} is at the gates of the Enchanted Castle!`, sub: 'One final challenge before the kingdom is saved!' },
+    ],
+    correct: ['Enchanting! ✨', 'Magical! 💖', 'Royal brilliance! 👑', 'The fairies cheer! 🧚', 'Fairy tale perfect! 🌸'],
+    wrong: ['Not quite, princess! 💔', 'The magic fizzled... ✨', 'Try again! ❌', 'Almost! 💫'],
+    flavors: {
+      add: ['More magic gems!', 'Fairy friends arrive!', 'Petals bloom!', 'Stars align!', 'Wishes multiply!'],
+      sub: ['Petals blew away...', 'Guests went home...', 'A gem was gifted...', 'Stars faded...', 'Magic was spent...'],
+    }
+  },
+
+  space: {
+    title: 'Space Explorer',
+    icon: '🚀',
+    gameOver: (name) => `Mission aborted, ${name}! Recharge your thrusters and try again!`,
+    win: (name) => `${name} has crossed the galaxy and discovered the legendary Star Cluster Omega! Mission complete!`,
+    levels: [
+      { scene: '🌍', place: 'Earth Launch', text: (n) => `3... 2... 1... LIFTOFF! ${n}'s mission has begun!`, sub: 'Leaving the atmosphere behind' },
+      { scene: '🌕', place: 'The Moon', text: (n) => `${n} lands on the Moon. One small step for math!`, sub: 'Low gravity makes numbers float' },
+      { scene: '☄️', place: 'Asteroid Belt', text: (n) => `${n} navigates the Asteroid Belt. Dodge and calculate!`, sub: 'Space rocks everywhere — stay sharp' },
+      { scene: '🔴', place: 'Mars', text: (n) => `Red dust swirls as ${n} touches down on Mars!`, sub: 'The red planet holds ancient secrets' },
+      { scene: '🪐', place: 'Saturn', text: (n) => `${n} flies through Saturn's rings — what a sight!`, sub: 'The rings are made of ice and math' },
+      { scene: '🌀', place: 'Nebula Zone', text: (n) => `${n} enters the swirling Nebula — colors everywhere!`, sub: 'New stars are being born around you' },
+      { scene: '💫', place: 'Twin Stars', text: (n) => `${n} orbits the mysterious Twin Stars system!`, sub: 'Two suns rise at the same time' },
+      { scene: '🌌', place: 'Deep Space', text: (n) => `${n} ventures into the deepest, darkest edge of space!`, sub: 'No one has been this far before' },
+      { scene: '🛸', place: 'Alien World', text: (n) => `${n} discovers an alien civilization! They love math too!`, sub: 'Universal language: numbers' },
+      { scene: '⭐', place: 'Star Cluster Omega', text: (n) => `${n} approaches the legendary Star Cluster Omega!`, sub: 'The final destination of all great explorers!' },
+    ],
+    correct: ['Mission success! ✅', 'Houston approves! 🚀', 'Stellar! ⭐', 'Warp speed correct! 🌌', 'Galactic! 🪐'],
+    wrong: ['Houston, problem! ❌', 'Off course! 🛸', 'Signal lost! ❌', 'Recalibrate! 📡'],
+    flavors: {
+      add: ['Rockets launched!', 'Asteroids collected!', 'Crew members joined!', 'Fuel cells loaded!', 'Stars discovered!'],
+      sub: ['Fuel burned...', 'Crew landed...', 'Signal lost...', 'Boosters jettisoned...', 'Power used...'],
+    }
+  }
+};
+
+const TOTAL_LEVELS = 10;
+const CORRECT_TO_ADVANCE = 10;
+const MAX_LIVES = 3;
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = {
+  theme: 'train',
+  playerName: 'Explorer',
+  level: 1,
+  lives: MAX_LIVES,
+  score: 0,
+  correctThisLevel: 0,
+  streak: 0,
+  diff: 'easy',
+  op: 'both',
+  answered: false,
+  currentAnswer: 0,
+};
+
+let startTheme = 'train';
+
+// ═══════════════════════════════════════════
+//  START SCREEN
+// ═══════════════════════════════════════════
+function selectStartTheme(t) {
+  startTheme = t;
+  document.body.className = 'theme-' + t;
+  document.querySelectorAll('.start-theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('stbtn-' + t).classList.add('active');
+  document.getElementById('startLogo').textContent = STORIES[t].icon;
+}
+
+let startDiff = "easy";
+let startOp = "both";
+
+function selectStartDiff(d) {
+  startDiff = d;
+  document.querySelectorAll("[id^=sdbtn-]").forEach(b => b.classList.remove("active"));
+  document.getElementById("sdbtn-" + d).classList.add("active");
+}
+
+function selectStartOp(o) {
+  startOp = o;
+  document.querySelectorAll("[id^=sobtn-]").forEach(b => b.classList.remove("active"));
+  document.getElementById("sobtn-" + o).classList.add("active");
+}
+
+function beginGame() {
+  const nameVal = document.getElementById('nameInput').value.trim();
+  state.playerName = nameVal || 'Explorer';
+  state.theme = startTheme;
+  state.diff = startDiff;
+  state.op = startOp;
+  document.body.className = 'theme-' + state.theme;
+
+  document.getElementById('startScreen').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    initGame();
+  }, 400);
+}
+
+// ═══════════════════════════════════════════
+//  THEME SWITCHER (in-game)
+// ═══════════════════════════════════════════
+function setTheme(t) {
+  state.theme = t;
+  document.body.className = 'theme-' + t;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tbtn-' + t).classList.add('active');
+  updateStoryBanner();
+  updateHUD();
+}
+
+// ═══════════════════════════════════════════
+//  DIFFICULTY & OP
+// ═══════════════════════════════════════════
+function setDiff(d) {
+  state.diff = d;
+  document.querySelectorAll('[id^="dbtn-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('dbtn-' + d).classList.add('active');
+}
+function setOp(o) {
+  state.op = o;
+  document.querySelectorAll('[id^="obtn-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('obtn-' + o).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  INIT / RESTART
+// ═══════════════════════════════════════════
+function initGame() {
+  state.level = 1;
+  state.lives = MAX_LIVES;
+  state.score = 0;
+  state.correctThisLevel = 0;
+  state.streak = 0;
+
+  // Sync theme buttons
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tbtn-' + state.theme).classList.add('active');
+
+  buildLevelDots();
+  updateHUD();
+  updateLives();
+  updateStoryBanner();
+  loadQuestion();
+}
+
+function restartGame() {
+  hideAllOverlays();
+  initGame();
+}
+
+function goToStart() {
+  hideAllOverlays();
+  document.getElementById('mainApp').style.display = 'none';
+  const ss = document.getElementById('startScreen');
+  ss.style.display = 'flex';
+  ss.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL DOTS
+// ═══════════════════════════════════════════
+function buildLevelDots() {
+  const container = document.getElementById('levelDots');
+  container.innerHTML = '';
+  for (let i = 0; i < CORRECT_TO_ADVANCE; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'level-dot';
+    dot.id = 'dot-' + i;
+    container.appendChild(dot);
+  }
+  updateDots();
+}
+
+function updateDots() {
+  for (let i = 0; i < CORRECT_TO_ADVANCE; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
+    dot.classList.remove('filled', 'current');
+    dot.style.removeProperty('--fill');
+    if (i < state.correctThisLevel) {
+      dot.classList.add('filled');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════
+//  HUD
+// ═══════════════════════════════════════════
+function updateHUD() {
+  const s = STORIES[state.theme];
+  document.getElementById('hudTitle').textContent = s.title;
+  document.getElementById('hudSubtitle').textContent = `Level ${state.level} of ${TOTAL_LEVELS}`;
+  document.getElementById('scoreDisplay').textContent = state.score;
+  document.getElementById('levelLabel').textContent = `Level ${state.level}`;
+  const rem = CORRECT_TO_ADVANCE - state.correctThisLevel;
+  document.getElementById('levelCount').textContent = `${state.correctThisLevel} / ${CORRECT_TO_ADVANCE} correct`;
+  document.getElementById('remainingCount').textContent = rem;
+}
+
+function updateLives() {
+  const hearts = '❤️'.repeat(state.lives) + '🖤'.repeat(MAX_LIVES - state.lives);
+  document.getElementById('livesDisplay').textContent = hearts;
+}
+
+// ═══════════════════════════════════════════
+//  STORY BANNER
+// ═══════════════════════════════════════════
+function updateStoryBanner() {
+  const s = STORIES[state.theme];
+  const lvlData = s.levels[state.level - 1];
+  document.getElementById('storyScene').textContent = lvlData.scene;
+  document.getElementById('storyText').textContent = lvlData.text(state.playerName);
+  document.getElementById('storySub').textContent = lvlData.sub;
+}
+
+// ═══════════════════════════════════════════
+//  QUESTION GENERATION
+// ═══════════════════════════════════════════
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function genNums() {
+  if (state.diff === 'easy') return [rand(1, 9), rand(1, 9)];
+  if (state.diff === 'medium') return [rand(10, 49), rand(1, 20)];
+  return [rand(15, 99), rand(8, 50)];
+}
+
+function pickOp() {
+  if (state.op === 'add') return '+';
+  if (state.op === 'sub') return '-';
+  return Math.random() < 0.5 ? '+' : '-';
+}
+
+function genQuestion() {
+  const op = pickOp();
+  let [a, b] = genNums();
+  if (op === '-' && b > a) [a, b] = [b, a];
+  if (op === '-' && a === b) a += rand(1, 4);
+  const answer = op === '+' ? a + b : a - b;
+  const display = `${a} ${op === '+' ? '+' : '−'} ${b}`;
+  return { a, b, op, answer, display };
+}
+
+function genChoices(answer) {
+  const spread = state.diff === 'easy' ? 4 : state.diff === 'medium' ? 8 : 15;
+  const pool = new Set([answer]);
+
+  const candidates = [
+    answer + 1, answer - 1, answer + 2, answer - 2,
+    answer + rand(2, spread), answer - rand(2, spread),
+    answer + rand(spread + 1, spread * 2),
+    answer - rand(spread + 1, spread * 2),
+  ];
+
+  for (const c of candidates) {
+    if (pool.size >= 4) break;
+    if (c !== answer && c >= 0 && !pool.has(c)) pool.add(c);
+  }
+
+  let fill = answer + rand(3, spread + 5);
+  while (pool.size < 4) {
+    if (!pool.has(fill) && fill >= 0) pool.add(fill);
+    fill++;
+  }
+
+  return [...pool].sort(() => Math.random() - 0.5);
+}
+
+// ═══════════════════════════════════════════
+//  CHIPTUNE AUDIO ENGINE
+// ═══════════════════════════════════════════
+let audioCtx = null;
+
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function chipNote(freq, startTime, duration, type = 'square', vol = 0.18, ctx) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, startTime);
+  gain.gain.setValueAtTime(vol, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.01);
+}
+
+function playCorrect() {
+  try {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    chipNote(523, t,       0.08, 'square', 0.15, ctx); // C5
+    chipNote(659, t+0.08,  0.08, 'square', 0.15, ctx); // E5
+    chipNote(784, t+0.16,  0.14, 'square', 0.18, ctx); // G5
+  } catch(e) {}
+}
+
+function playWrong() {
+  try {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    chipNote(220, t,      0.1, 'square', 0.18, ctx);
+    chipNote(180, t+0.1,  0.15,'square', 0.16, ctx);
+    chipNote(140, t+0.25, 0.2, 'square', 0.14, ctx);
+  } catch(e) {}
+}
+
+function playLevelUp() {
+  try {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    // Ascending fanfare
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((f, i) => chipNote(f, t + i*0.1, 0.12, 'square', 0.16, ctx));
+    // Harmony layer
+    chipNote(659, t+0.3, 0.25, 'square', 0.1, ctx);
+    chipNote(784, t+0.3, 0.25, 'square', 0.1, ctx);
+    chipNote(1047,t+0.3, 0.25, 'square', 0.12, ctx);
+  } catch(e) {}
+}
+
+function playLifeLost() {
+  try {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    chipNote(330, t,      0.12, 'square', 0.18, ctx);
+    chipNote(277, t+0.13, 0.12, 'square', 0.16, ctx);
+    chipNote(220, t+0.26, 0.22, 'square', 0.14, ctx);
+  } catch(e) {}
+}
+
+function playGameOver() {
+  try {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    const notes = [392, 349, 330, 294, 262];
+    notes.forEach((f, i) => chipNote(f, t + i*0.13, 0.15, 'square', 0.15, ctx));
+  } catch(e) {}
+}
+
+function playWin() {
+  try {
+    const ctx = getAudio();
+    const t = ctx.currentTime;
+    // Victory fanfare
+    const melody = [523,523,523,415,523,659,523,659,784];
+    const times  = [0, 0.15, 0.30, 0.38, 0.46, 0.54, 0.70, 0.78, 0.86];
+    melody.forEach((f,i) => chipNote(f, t+times[i], 0.13, 'square', 0.16, ctx));
+    chipNote(1047, t+1.0, 0.4, 'square', 0.18, ctx);
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  LOAD QUESTION
+// ═══════════════════════════════════════════
+function loadQuestion() {
+  state.answered = false;
+  const q = genQuestion();
+  state.currentAnswer = q.answer;
+
+  const s = STORIES[state.theme];
+  const flavArr = q.op === '+' ? s.flavors.add : s.flavors.sub;
+
+  document.getElementById('qFlavor').textContent = flavArr[rand(0, flavArr.length - 1)];
+  document.getElementById('qNumber').textContent = q.display;
+  document.getElementById('qStory').textContent = `${s.levels[state.level - 1].place} — What's the answer?`;
+
+  // FIX: Fully replace the grid element to guarantee zero residual state
+  const oldGrid = document.getElementById('choicesGrid');
+  const newGrid = document.createElement('div');
+  newGrid.className = oldGrid.className;
+  newGrid.id = 'choicesGrid';
+  oldGrid.parentNode.replaceChild(newGrid, oldGrid);
+
+  const choices = genChoices(q.answer);
+  choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.textContent = c;
+    btn.onclick = () => handleAnswer(btn, c);
+    newGrid.appendChild(btn);
+  });
+
+  // Clear feedback
+  const fb = document.getElementById('feedbackBar');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  updateStreak();
+}
+
+// ═══════════════════════════════════════════
+//  ANSWER HANDLING
+// ═══════════════════════════════════════════
+function handleAnswer(btn, chosen) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const correct = chosen === state.currentAnswer;
+  const s = STORIES[state.theme];
+  const fb = document.getElementById('feedbackBar');
+
+  // Disable all buttons, show correct
+  document.querySelectorAll('.choice').forEach(b => {
+    b.disabled = true;
+    if (parseInt(b.textContent) === state.currentAnswer) b.classList.add('correct');
+  });
+
+  if (correct) {
+    btn.classList.add('correct');
+    state.score++;
+    state.correctThisLevel++;
+    state.streak++;
+    document.getElementById('scoreDisplay').textContent = state.score;
+
+    fb.className = 'feedback ok';
+    fb.textContent = s.correct[rand(0, s.correct.length - 1)];
+
+    // Flash green
+    const cf = document.getElementById('correctFlash');
+    cf.classList.remove('flash');
+    void cf.offsetWidth;
+    cf.classList.add('flash');
+
+    updateDots();
+    updateHUD();
+    updateStreak();
+
+    if (state.correctThisLevel >= CORRECT_TO_ADVANCE) {
+      playLevelUp();
+      setTimeout(() => showLevelComplete(), 700);
+    } else {
+      playCorrect();
+      setTimeout(() => loadQuestion(), 900);
+    }
+  } else {
+    btn.classList.add('wrong');
+    state.streak = 0;
+    state.lives--;
+
+    fb.className = 'feedback bad';
+    fb.textContent = s.wrong[rand(0, s.wrong.length - 1)] + ` (Answer: ${state.currentAnswer})`;
+
+    // Flash red
+    const lf = document.getElementById('lifeLostFlash');
+    lf.classList.remove('flash');
+    void lf.offsetWidth;
+    lf.classList.add('flash');
+
+    updateLives();
+    updateStreak();
+
+    if (state.lives <= 0) {
+      playGameOver();
+      setTimeout(() => showGameOver(), 900);
+    } else {
+      playLifeLost();
+      setTimeout(() => loadQuestion(), 1000);
+    }
+  }
+}
+
+function updateStreak() {
+  const sb = document.getElementById('streakBar');
+  if (state.streak >= 3) {
+    sb.textContent = `🔥 ${state.streak} in a row!`;
+  } else if (state.streak >= 2) {
+    sb.textContent = `✨ ${state.streak} in a row!`;
+  } else {
+    sb.textContent = '';
+  }
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL COMPLETE
+// ═══════════════════════════════════════════
+function showLevelComplete() {
+  const s = STORIES[state.theme];
+  const lvlData = s.levels[state.level - 1];
+
+  document.getElementById('lvlEmoji').textContent = lvlData.scene;
+  document.getElementById('lvlTitle').textContent = `${lvlData.place} — Complete! 🎉`;
+  document.getElementById('lvlStory').textContent =
+    state.level < TOTAL_LEVELS
+      ? `You've mastered ${lvlData.place}! Next up: ${s.levels[state.level].place}!`
+      : `The final level is complete! Time to claim victory!`;
+  document.getElementById('lvlScore').textContent = state.score;
+  document.getElementById('lvlNum').textContent = state.level;
+
+  const nextBtn = document.getElementById('nextLevelBtn');
+  nextBtn.textContent = state.level >= TOTAL_LEVELS ? '🏆 Claim Victory!' : 'Next Level →';
+
+  document.getElementById('levelOverlay').classList.add('show');
+}
+
+function advanceLevel() {
+  document.getElementById('levelOverlay').classList.remove('show');
+
+  if (state.level >= TOTAL_LEVELS) {
+    setTimeout(() => showWin(), 300);
+    return;
+  }
+
+  state.level++;
+  state.correctThisLevel = 0;
+
+  buildLevelDots();
+  updateHUD();
+  updateStoryBanner();
+  setTimeout(() => loadQuestion(), 200);
+}
+
+// ═══════════════════════════════════════════
+//  GAME OVER
+// ═══════════════════════════════════════════
+function showGameOver() {
+  const s = STORIES[state.theme];
+  document.getElementById('goEmoji').textContent = s.icon;
+  document.getElementById('goStory').textContent = s.gameOver(state.playerName);
+  document.getElementById('goScore').textContent = state.score;
+  document.getElementById('goLevel').textContent = state.level;
+  document.getElementById('gameOverOverlay').classList.add('show');
+}
+
+// ═══════════════════════════════════════════
+//  WIN
+// ═══════════════════════════════════════════
+function showWin() {
+  playWin();
+  const s = STORIES[state.theme];
+  const stars = state.lives === 3 ? '⭐⭐⭐' : state.lives === 2 ? '⭐⭐☆' : '⭐☆☆';
+
+  document.getElementById('winEmoji').textContent = '🏆';
+  document.getElementById('winTitle').textContent = `${state.playerName} Wins!`;
+  document.getElementById('winStory').textContent = s.win(state.playerName);
+  document.getElementById('winStars').textContent = stars;
+  document.getElementById('winScore').textContent = state.score;
+  document.getElementById('winLives').textContent = state.lives;
+  document.getElementById('winOverlay').classList.add('show');
+}
+
+// ═══════════════════════════════════════════
+//  UTILITY
+// ═══════════════════════════════════════════
+function hideAllOverlays() {
+  ['levelOverlay','gameOverOverlay','winOverlay'].forEach(id => {
+    document.getElementById(id).classList.remove('show');
+  });
+}
+</script>
+</body>
+</html>

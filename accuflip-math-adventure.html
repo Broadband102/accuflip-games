@@ -775,7 +775,39 @@ body.theme-princess .q-number {
   margin-top: 12px;
 }
 .start-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
-</style>
+
+    /* ── Etsy CTA Banner ── */
+    .etsy-cta {
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #f56400 0%, #ff9500 100%);
+      border-radius: 14px;
+      text-align: center;
+    }
+    .etsy-cta-text {
+      font-size: 0.82rem;
+      color: #fff;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .etsy-cta-btn {
+      display: inline-block;
+      background: #fff;
+      color: #f56400;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 8px 18px;
+      border-radius: 20px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .etsy-cta-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    }
+  </style>
 </head>
 <body class="theme-train">
 
@@ -906,6 +938,10 @@ body.theme-princess .q-number {
     </div>
     <button class="ov-btn" onclick="restartGame()">Try Again 🔄</button>
     <button class="ov-btn secondary" onclick="goToStart()">Change Settings</button>
+    <div class="etsy-cta">
+      <div class="etsy-cta-text">💾 Love Accuflip? Own it forever — works offline, no link needed!</div>
+      <a class="etsy-cta-btn" href="https://www.etsy.com/shop/AccuFlipDigital" target="_blank" rel="noopener">Get all 3 games on Etsy 🛒</a>
+    </div>
   </div>
 </div>
 
@@ -922,6 +958,10 @@ body.theme-princess .q-number {
     </div>
     <button class="ov-btn" onclick="restartGame()">Play Again 🔄</button>
     <button class="ov-btn secondary" onclick="goToStart()">New Adventure</button>
+    <div class="etsy-cta">
+      <div class="etsy-cta-text">💾 Love Accuflip? Own it forever — works offline, no link needed!</div>
+      <a class="etsy-cta-btn" href="https://www.etsy.com/shop/AccuFlipDigital" target="_blank" rel="noopener">Get all 3 games on Etsy 🛒</a>
+    </div>
   </div>
 </div>
 
